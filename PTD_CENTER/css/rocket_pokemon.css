@@ -1,0 +1,251 @@
+#rocket-pokemon-content {
+    width: 800px;
+    position: absolute;
+    top: 25px;
+    left: max(50%, 720px);
+    transform: translateX(-50%);
+    background: #F0EEE9d9;
+    border-radius: 10px;
+    font-size: 1rem;
+    padding: 20px;
+    box-sizing: border-box;
+    min-height: 650px;
+}
+
+.casino-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 8px 0;
+    margin-bottom: 30px;
+}
+
+.coin-balance {
+    position: absolute;
+    top: 25px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    padding: 6px 14px;
+    border: 1px solid #C7D2DE;
+    border-radius: 6px;
+    background: #E7ECF2;
+    font-size: 0.95rem;
+    font-weight: bold;
+}
+.coin-balance .coin-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.coin-balance .coin-icon img {
+    display: block;
+    position: relative;
+    top: -1px;
+}
+
+.rocket-pokemon-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 240px);
+    gap: 20px;
+    width: 100%;
+    justify-content: start;
+    align-content: start;
+    min-height: 350px;
+}
+
+.shop-locked-message {
+    min-height: 350px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-size: 0.95rem;
+    text-align: center;
+    line-height: 1.6;
+}
+
+.rocket-pokemon-card {
+    position: relative;
+    width: 240px;
+    height: 100px;
+    background: #E7ECF2;
+    border: 1px solid #C7D2DE;
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: stretch;
+    padding: 8px;
+    gap: 8px;
+}
+/* 모습(일반/샤이니/다크)별 카드 배경색 — 살짝만 다르게, 정보 구분용이라
+   시선을 크게 끌지 않는 톤으로 정함. form-0(일반)은 기존 배경색 그대로. */
+.rocket-pokemon-card.form-1 {
+    background: #F1EAD0;
+    border-color: #E6D8A8;
+}
+.rocket-pokemon-card.form-2 {
+    background: #EDE3F5;
+    border-color: #CBB8DE;
+}
+
+.rocket-pokemon-card:hover {
+    outline: 2px solid #4444ff;
+}
+
+
+.rocket-pokemon-card .card-left {
+    flex: 0 0 42px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0px;
+}
+.rocket-pokemon-card .sprite {
+    width: 60px;
+    height: 60px;
+    margin-top: 0px;
+    image-rendering: pixelated;
+}
+.rocket-pokemon-card .name {
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.1;
+    white-space: nowrap;
+    margin-top: 0;
+}
+.rocket-pokemon-card .level {
+    font-size: 0.8rem;
+    color: #000;
+}
+
+.rocket-pokemon-card .card-right {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    justify-content: center;
+}
+.rocket-pokemon-card .price-row {
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #000;
+    padding-bottom: 1px;
+    margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.rocket-pokemon-card .price-row .price-value {
+    font-weight: bold;
+    color: #000;
+}
+.rocket-pokemon-card .move-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(2, auto);
+    min-height: 35px;
+    gap: 1px 6px;
+    width: calc(100% - 5px);
+    border-top: 1px solid #C7D2DE;
+    border-bottom: 1px solid #C7D2DE;
+    padding: 3px 0;
+}
+.rocket-pokemon-card .move-cell {
+    font-size: 0.7rem;
+    color: #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+}
+.rocket-pokemon-card .card-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 3px;
+}
+.rocket-pokemon-card .card-action-link {
+    position: static;
+    width: auto;
+    height: auto;
+    bottom: auto;
+    right: auto;
+    display: block;
+    flex: 0 0 auto;
+    text-align: left;
+    font-size: 0.7rem;
+    color: #4444ff;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.rocket-pokemon-card .card-action-link:hover {
+    text-decoration: underline;
+}
+.rocket-pokemon-card .status-icon {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    width: 14px;
+    height: 14px;
+    image-rendering: pixelated;
+}
+
+.pagination {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.pagination button {
+    position: static;
+    min-width: 32px;
+    width: auto;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #C7D2DE;
+    background: #F0EEE9;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+.pagination button:hover {
+    background: #E7ECF2;
+}
+.pagination button.active {
+    background: #4444ff;
+    border-color: #4444ff;
+    color: #fff;
+    font-weight: bold;
+    cursor: default;
+}
+.pagination button:disabled {
+    color: #aaa;
+    cursor: default;
+    background: #F0EEE9;
+}
+
+/* 확인 팝업의 보조 버튼(취소)을 강조색과 구분되는 회색으로 표시 */
+.modal-secondary {
+    background: #E7ECF2 !important;
+    border-color: #C7D2DE !important;
+    color: #000 !important;
+}
+.modal-secondary:hover {
+    background: #DCE4EE !important;
+}
+.modal-actions {
+    gap: 10px;
+}

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTD 포켓몬 센터</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/base.css">
+    <link rel="stylesheet" href="./css/trade_receive.css">
+</head>
+<body>
+    <div class="wrapper">
+        <header id="head"><span id="notice">
+            한국 PTD 포켓몬센터에 오신 것을 환영합니다.
+        </span></header>
+        <nav id="menu">
+            <ul>
+                <li class="tab"><a href="https://samdangames.blogspot.com/" target="_blank">샘의 블로그</a></li>
+                <li class="tab"><a href="/">홈</a></li>
+                <li class="tab has-sub">
+                    <a href="#">인벤토리</a>
+                    <ul class="submenu">
+                        <li><a href="/inventory_pokemon">포켓몬</a></li>
+                        <li><a href="/inventory_bag">가방</a></li>
+                        <li><a href="/inventory_avatar">아바타</a></li>
+                    </ul>
+                </li>
+                <li class="tab has-sub">
+                    <a href="#">트레이드 센터</a>
+                    <ul class="submenu">
+                        <li><a href="/trade_own">보유 포켓몬</a></li>
+                        <li><a href="/trade_offer">통신 교환 대기</a></li>
+                        <li><a href="/trade_market">통신 교환 검색</a></li>
+                        <li><a href="/trade_receive">포켓몬 수령</a></li>
+                    </ul>
+                </li>
+                <li class="tab has-sub">
+                    <a href="#">무지개 게임코너</a>
+                    <ul class="submenu">
+                        <li><a href="/rocket_game">미니 게임 코너</a></li>
+                        <li><a href="/rocket_pokemon">포켓몬 경품 코너</a></li>
+                        <li><a href="/rocket_avatar">아바타 경품 코너</a></li>
+                        <li><a href="/rocket_receive">경품 수령</a></li>
+                    </ul>
+                </li>
+                <li class="tab"><a href="/about">소개 및 문의</a></li>
+            </ul>
+        </nav>
+        <div id="background">
+            <main>
+                <aside>
+                    <fieldset id="welcome">
+                        <legend>트레이너</legend>
+                        <p id="welcome-email">test@example.com</p>
+                        <div id="profile-row">
+                            <label id="profile-label">프로필 선택</label>
+                            <select id="profile-select">
+                                <option value="" id="profile-placeholder">프로필 선택</option>
+                                <option value="1">프로필 슬롯 1</option>
+                                <option value="2">프로필 슬롯 2</option>
+                                <option value="3">프로필 슬롯 3</option>
+                            </select>
+                        </div>
+                        <div id="profile-summary-row" style="display: none;">
+                            <div id="profile-summary">
+                                <p><b>이름</b> : <span id="summary-name">한지우</span></p>
+                                <p><b>포켓몬</b> : <span id="summary-pokemon">100</span></p>
+                                <p><b>배지</b> : <span id="summary-badges">8</span></p>
+                                <p><b>버전</b> : <span id="summary-version">레드</span></p>
+                            </div>
+                            <img id="summary-avatar" src="./image/avatar/b_1_y.png" alt="아바타">
+                        </div>
+                        <a href="#" id="pw-change">비밀번호 바꾸기</a>
+                        <button>로그아웃</button>
+                    </fieldset>
+                    <fieldset id="pw-change-panel" style="display:none;">
+                        <div class="pw-row">
+                            <label for="pw-current">현재 비밀번호</label>
+                            <input type="password" id="pw-current">
+                        </div>
+                        <div class="pw-verify-row">
+                            <button type="button" id="pw-verify-button">확인</button>
+                            <p id="pw-verify-result" class="pw-verify-result" style="display:none;"></p>
+                        </div>
+                        <div class="pw-row">
+                            <label for="pw-new">새 비밀번호</label>
+                            <input type="password" id="pw-new">
+                        </div>
+                        <div class="pw-row">
+                            <label for="pw-new-confirm">새 비밀번호 확인</label>
+                            <input type="password" id="pw-new-confirm">
+                        </div>
+                        <p id="pw-change-error" class="pw-change-error" style="display:none;"></p>
+                        <div class="pw-change-actions">
+                            <button type="button" id="pw-change-submit" disabled>변경하기</button>
+                            <button type="button" id="pw-change-cancel">취소</button>
+                        </div>
+                    </fieldset>
+                </aside>
+                <div id="trade-receive-content">
+                    <h3 class="trade-title">포켓몬 수령</h3>
+
+                    <div class="pokemon-toolbar">
+                        <div class="sort-buttons" id="sort-buttons">
+                            <button type="button" class="sort-button active" data-sort="dex">도감번호</button>
+                            <button type="button" class="sort-button" data-sort="name">이름</button>
+                            <button type="button" class="sort-button" data-sort="level">레벨</button>
+                        </div>
+                        <div class="filter-wrap">
+                            <button type="button" class="filter-button" id="filter-button">필터</button>
+                            <div class="filter-panel" id="filter-panel" style="display:none;">
+                                <label class="filter-all"><span>전체</span><input type="checkbox" id="filter-all-checkbox" checked></label>
+                                <label><span>노말</span><input type="checkbox" value="노말" checked></label>
+                                <label><span>불꽃</span><input type="checkbox" value="불꽃" checked></label>
+                                <label><span>격투</span><input type="checkbox" value="격투" checked></label>
+                                <label><span>물</span><input type="checkbox" value="물" checked></label>
+                                <label><span>비행</span><input type="checkbox" value="비행" checked></label>
+                                <label><span>풀</span><input type="checkbox" value="풀" checked></label>
+                                <label><span>독</span><input type="checkbox" value="독" checked></label>
+                                <label><span>전기</span><input type="checkbox" value="전기" checked></label>
+                                <label><span>땅</span><input type="checkbox" value="땅" checked></label>
+                                <label><span>에스퍼</span><input type="checkbox" value="에스퍼" checked></label>
+                                <label><span>바위</span><input type="checkbox" value="바위" checked></label>
+                                <label><span>얼음</span><input type="checkbox" value="얼음" checked></label>
+                                <label><span>벌레</span><input type="checkbox" value="벌레" checked></label>
+                                <label><span>드래곤</span><input type="checkbox" value="드래곤" checked></label>
+                                <label><span>고스트</span><input type="checkbox" value="고스트" checked></label>
+                                <label><span>악</span><input type="checkbox" value="악" checked></label>
+                                <label><span>강철</span><input type="checkbox" value="강철" checked></label>
+                                <label><span>페어리</span><input type="checkbox" value="페어리" checked></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pokemon-grid" id="pokemon-grid">
+                    </div>
+                    <div class="pagination" id="pokemon-pagination">
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <!-- 수령 확인 팝업 (화면 중앙 모달) -->
+    <div class="modal-overlay" id="receive-confirm-modal" style="display:none;">
+        <div class="modal-card receive-confirm-card">
+            <p class="modal-message">수령할 프로필을 선택하세요</p>
+            <div class="receive-slot-row" id="receive-slot-row"></div>
+            <p class="modal-error" id="receive-confirm-error" style="display:none;"></p>
+            <div class="modal-actions">
+                <button type="button" id="receive-confirm-yes">확인</button>
+                <button type="button" id="receive-confirm-no" class="modal-secondary">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/auth.js"></script>
+    <script src="./js/trade_receive.js"></script>
+</body>
+</html>

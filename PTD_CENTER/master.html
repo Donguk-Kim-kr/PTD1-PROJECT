@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    <link rel="stylesheet" href="./css/master.css">
+</head>
+<body>
+    <!--
+        인증(requireAdmin()) 통과 전에는 body가 비어 있습니다.
+        master.js가 관리자 확인에 성공한 뒤에만 이 안에 화면을 채워 넣습니다.
+        HTML 자체에 화면 구조를 미리 심어두지 않는 이유: 관리자가 아닌
+        사람이 잠깐이라도 골격(빈 표, 버튼 등)을 보게 하고 싶지 않아서입니다.
+    -->
+    <div id="app"></div>
+
+    <!-- 이상한소포 등록/수정 화면의 포켓몬 선택 모달 전용 카드 템플릿.
+         trade_own.html의 pick-card-template과 동일한 구조(스프라이트+이름)를
+         그대로 따릅니다. -->
+    <template id="mystery-pick-card-template">
+        <div class="mystery-pick-card" tabindex="0">
+            <img class="mystery-pick-sprite" src="" alt="">
+            <div class="mystery-pick-name"></div>
+        </div>
+    </template>
+
+    <script src="./js/auth.js"></script>
+    <script src="./js/master.js"></script>
+</body>
+</html>

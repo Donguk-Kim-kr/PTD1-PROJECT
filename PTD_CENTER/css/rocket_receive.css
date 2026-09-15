@@ -1,0 +1,407 @@
+#rocket-receive-content {
+    width: 800px;
+    position: absolute;
+    top: 25px;
+    left: max(50%, 720px);
+    transform: translateX(-50%);
+    background: #F0EEE9d9;
+    border-radius: 10px;
+    font-size: 1rem;
+    padding: 20px;
+    box-sizing: border-box;
+    min-height: 650px;
+}
+
+.casino-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 8px 0;
+    margin-bottom: 30px;
+}
+
+.pokemon-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 240px);
+    gap: 20px;
+    width: 100%;
+    justify-content: start;
+    align-content: start;
+    min-height: 350px;
+}
+
+.pokemon-card {
+    position: relative;
+    width: 240px;
+    height: 100px;
+    background: #E7ECF2;
+    border: 1px solid #C7D2DE;
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: stretch;
+    padding: 8px;
+    gap: 8px;
+}
+/* 모습(일반/샤이니/다크)별 카드 배경색 — 살짝만 다르게, 정보 구분용이라
+   시선을 크게 끌지 않는 톤으로 정함. form-0(일반)은 기존 배경색 그대로. */
+.pokemon-card.form-1 {
+    background: #F1EAD0;
+    border-color: #E6D8A8;
+}
+.pokemon-card.form-2 {
+    background: #EDE3F5;
+    border-color: #CBB8DE;
+}
+.pokemon-card:hover {
+    outline: 2px solid #4444ff;
+}
+
+.pokemon-card .card-left {
+    flex: 0 0 42px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0px;
+}
+.pokemon-card .sprite {
+    width: 60px;
+    height: 60px;
+    margin-top: 0px;
+    image-rendering: pixelated;
+}
+.pokemon-card .name {
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.1;
+    white-space: nowrap;
+    margin-top: 0;
+}
+.pokemon-card .level {
+    font-size: 0.8rem;
+    color: #000;
+}
+
+.pokemon-card .card-right {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    justify-content: center;
+}
+.pokemon-card .nickname-row {
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #000;
+    padding-bottom: 1px;
+    margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pokemon-card .nickname-row .nickname-value {
+    font-weight: normal;
+    color: #000;
+}
+.pokemon-card .move-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(2, auto);
+    min-height: 35px;
+    gap: 1px 6px;
+    width: calc(100% - 5px);
+    border-top: 1px solid #C7D2DE;
+    border-bottom: 1px solid #C7D2DE;
+    padding: 3px 0;
+}
+.pokemon-card .move-cell {
+    font-size: 0.7rem;
+    color: #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+}
+.pokemon-card .card-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 3px;
+}
+.pokemon-card .card-action-link {
+    position: static;
+    width: auto;
+    height: auto;
+    bottom: auto;
+    right: auto;
+    display: block;
+    flex: 0 0 auto;
+    text-align: left;
+    font-size: 0.7rem;
+    color: #4444ff;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.pokemon-card .card-action-link:hover {
+    text-decoration: underline;
+}
+.pokemon-card .card-action-link:nth-child(2) {
+    padding-left: 1px;
+}
+.pokemon-card .status-icon {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    width: 14px;
+    height: 14px;
+    image-rendering: pixelated;
+}
+
+.pagination {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.pagination button {
+    position: static;
+    min-width: 32px;
+    width: auto;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #C7D2DE;
+    background: #F0EEE9;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.pagination button:hover {
+    background: #E7ECF2;
+}
+
+.pagination button.active {
+    background: #4444ff;
+    border-color: #4444ff;
+    color: #fff;
+    font-weight: bold;
+    cursor: default;
+}
+
+.pagination button:disabled {
+    color: #aaa;
+    cursor: default;
+    background: #F0EEE9;
+}
+
+.pokemon-toolbar {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.sort-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.sort-button {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 4px 2px;
+    border: none;
+    background: none;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: #000;
+    cursor: pointer;
+}
+.sort-button:hover {
+    text-decoration: underline;
+}
+.sort-button.active {
+    font-weight: bold;
+    color: #000;
+}
+
+.filter-wrap {
+    position: relative;
+}
+
+.filter-button {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 6px 14px 4px;
+    border: 1px solid #C7D2DE;
+    background: #E7ECF2;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+}
+.filter-button:hover {
+    background: #DCE4EE;
+}
+
+.filter-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 220px;
+    background: #ffffff;
+    border: 1px solid #C7D2DE;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 110px 110px;
+    gap: 8px 0px;
+    z-index: 10;
+    box-sizing: border-box
+}
+
+.filter-panel label {
+    display: flex;
+    width: 100%;
+    margin-bottom: 0;
+    align-items: center;
+    gap: 2px;
+    font-size: 1rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.filter-panel label span {
+    display: inline-block;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+}
+.filter-panel label input {
+    flex: 0 0 auto;
+    height: 14px;
+}
+
+.filter-panel label.filter-all {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 110px 110px;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #C7D2DE;
+    align-items: center;
+    width: calc(100% - 45px);
+}
+
+.filter-panel label.filter-all span {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.filter-panel label.filter-all input {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+    margin-left: auto;
+    transform: translateX(2px);
+}
+
+/* 모달 확인 실패 시 에러 문구는 base.css의 .modal-error 공용 스타일을 씁니다. */
+.receive-slot-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 10px 0 20px;
+}
+.receive-slot-card {
+    position: static;
+    width: 100%;
+    height: auto;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border: 2px solid #C7D2DE;
+    border-radius: 10px;
+    background: #E7ECF2;
+    cursor: pointer;
+    text-align: left;
+    box-sizing: border-box;
+}
+.receive-slot-card:hover {
+    background: #DCE4EE;
+}
+.receive-slot-card.selected {
+    border-color: #4444ff;
+    background: #DCE4EE;
+}
+.receive-slot-card:focus-visible {
+    outline: 2px solid #4444ff;
+    outline-offset: 2px;
+}
+/* 선택된 카드는 이미 파란 테두리(.selected)로 표시되므로, 포커스 아웃라인까지
+   겹치면 두 겹으로 보입니다. 선택된 카드에서는 포커스 아웃라인을 끕니다. */
+.receive-slot-card.selected:focus-visible {
+    outline: none;
+}
+.receive-slot-name {
+    width: 100px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: #222;
+}
+.receive-slot-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #000;
+}
+/* ══════════════════════════════════════════════
+   수령 확인 모달 (화면 중앙)
+   ══════════════════════════════════════════════ */
+.receive-confirm-card {
+    width: 340px;
+    max-width: 340px;
+}
+#receive-confirm-modal .modal-actions {
+    gap: 10px;
+}
+#receive-confirm-yes:disabled {
+    background: #C7D2DE;
+    border-color: #C7D2DE;
+    color: #888;
+    cursor: default;
+}
+
+.modal-secondary {
+    background: #E7ECF2 !important;
+    border-color: #C7D2DE !important;
+    color: #000 !important;
+}
+.modal-secondary:hover {
+    background: #DCE4EE !important;
+}

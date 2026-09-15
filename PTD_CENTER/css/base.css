@@ -1,0 +1,451 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+html {
+    font-family: 'Pretendard Variable', sans-serif;
+}
+
+body {
+    min-width: max-content;
+}
+.wrapper {
+    margin: 0 auto;
+    width: 100%;
+    min-width: 1440px;
+}
+#head {
+    background: url(../image/PTD_logo.webp) no-repeat, linear-gradient(to bottom, #ff3232, #960000);
+    background-size: auto 80%, cover;
+    background-position: 10px center;
+    width: 100%;
+    height: 160px;
+    position: relative;
+    font-size: 2rem;
+    color: #2244ff;
+}
+#notice {
+    position: absolute;
+    left: max(50%, 670px);
+    transform: translate(-50%, -50%);
+    top: 50%;
+    text-align: center;
+    white-space: nowrap;
+    font-family: 'PakrDoyeon', sans-serif;
+}
+#menu {
+    background: linear-gradient(to bottom, #afafaf, #323232);
+    height: 35px;
+    position: relative;
+    z-index: 20;
+}
+#menu a {
+    text-decoration: none;
+    color: #ffffff;
+}
+#menu > ul {
+    position: relative;
+}
+.submenu {
+    list-style: none;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 100%;
+    background: #2c2c2c;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+    z-index: 30;
+}
+.tab.has-sub:hover .submenu,
+.tab.has-sub.nav-open .submenu {
+    display: block;
+}
+.submenu li {
+    height: auto;
+    padding: 0;
+    display: block;
+    border-right: 0;
+}
+.submenu li a {
+    display: block;
+    padding: 10px 20px;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    color: #ffffff;
+}
+.submenu li a:hover {
+    background: #ff3232;
+}
+.tab.disabled > a {
+    color: rgba(255, 255, 255, 0.4);
+    cursor: default;
+    pointer-events: none;
+}
+.submenu .disabled a {
+    color: rgba(255, 255, 255, 0.35);
+    cursor: default;
+    pointer-events: none;
+}
+#background {
+    display: flow-root;
+    background: url(../image/PTD_background.webp) no-repeat;
+    background-size: 100% auto;
+    aspect-ratio: 1600 / 850;
+    position: relative;
+}
+ul {
+    list-style: none;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+li {
+    height: 35px;
+    padding-left: 15px;
+    padding-right: 15px;
+    white-space: nowrap;
+    text-align: center;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+}
+.tab {
+    border-right: 1px solid rgba(255, 255, 255, 0.288);
+    color: #ffffff;
+    position: relative;
+}
+.tab:last-child {
+    border-right: 0;
+}
+aside {
+    width: 302px;
+    display: flow-root;
+}
+
+#login {
+    background-color: #F0EEE9d9;
+    margin: 25px;
+    width: 250px;
+    height: 200px;
+    border-radius: 10px;
+    position: relative;
+    padding-top: 20px;
+    font-size: 1rem;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+}
+legend {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-weight: bold;
+}
+label {
+    display: block;
+    
+    margin-bottom: 2px;
+    font-size: 1rem;
+}
+#mail { 
+    margin-top: 40px;
+}
+#pass {
+    margin-top: 10px;
+}
+
+input {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border: 1px inset rgb(118, 118, 118);
+    border-radius: 3px;
+    padding: 2px;
+}
+button {
+    width: 70px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    font-size: 1rem;
+    background-color: #ffffff;
+    line-height: 1;
+    border: 1px solid #000000;
+    border-radius: 3px;    
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #e1e1e1;
+    border-color: #000000;
+}
+
+button:active {
+    background-color: #c2c2c2;
+    border-color: #000000;
+}
+
+#forget {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    bottom: 27px;
+    left: 20px;
+    text-decoration: none;
+}
+
+#login-error {
+    display: none;
+    position: absolute;
+    bottom: 60px;
+    left: 20px;
+    right: 20px;
+    color: red;
+    font-size: 1rem;
+}
+
+#forget:visited {
+    color: blue;
+}
+
+#welcome {
+    background-color: #F0EEE9d9;
+    margin: 25px;
+    width: 250px;
+    height: 200px;
+    border-radius: 10px;
+    position: relative;
+    padding-top: 20px;
+    font-size: 1rem;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+}
+
+#welcome-email {
+    margin-top: 25px;
+    font-size: 1rem;
+    word-break: break-all;
+}
+
+#pw-change {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    bottom: 27px;
+    left: 20px;
+    text-decoration: none;
+}
+
+/* 비밀번호 변경 패널: #welcome과 같은 폭/스타일로, 그 아래에 이어붙습니다. */
+#pw-change-panel {
+    background-color: #F0EEE9d9;
+    margin: -15px 25px 25px 25px;
+    width: 250px;
+    border-radius: 10px;
+    position: relative;
+    padding: 20px;
+    font-size: 1rem;
+}
+#pw-change-panel .pw-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 14px;
+}
+#pw-change-panel .pw-row:first-of-type {
+    margin-top: 25px;
+}
+#pw-change-panel label {
+    font-weight: bold;
+    font-size: 1rem;
+}
+#pw-change-panel input[type="password"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    border: 1px solid #C7D2DE;
+    border-radius: 4px;
+}
+.pw-verify-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+}
+.pw-verify-row button {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 5px 10px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    border: 1px solid #C7D2DE;
+    border-radius: 4px;
+    background: #E7ECF2;
+    cursor: pointer;
+}
+.pw-verify-row button:hover {
+    background: #DCE4EE;
+}
+.pw-verify-result {
+    font-size: 0.95rem;
+    font-weight: bold;
+    margin-top: 0;
+    text-align: right;
+}
+.pw-verify-result.success {
+    color: #2a8a3e;
+}
+.pw-verify-result.fail {
+    color: #cc3333;
+}
+.pw-change-error {
+    font-size: 0.8rem;
+    color: #cc3333;
+    margin-top: 8px;
+}
+.pw-change-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+.pw-change-actions button {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 6px 14px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    border: 1px solid #C7D2DE;
+    border-radius: 4px;
+    background: #E7ECF2;
+    cursor: pointer;
+}
+.pw-change-actions button:hover:not(:disabled) {
+    background: #DCE4EE;
+}
+#pw-change-submit {
+    background: #4444ff;
+    border-color: #4444ff;
+    color: #fff;
+}
+#pw-change-submit:hover:not(:disabled) {
+    background: #3333cc;
+}
+#pw-change-submit:disabled {
+    background: #ccc;
+    border-color: #ccc;
+    color: #888;
+    cursor: default;
+}
+
+#profile-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+#profile-label {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+#profile-select {
+    width: auto;
+    padding: 1px 2px;
+    font-size: 1rem;
+    border: 1px inset rgb(118, 118, 118);
+    border-radius: 3px;
+}
+
+#profile-summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 5px;
+}
+
+#profile-summary {
+    font-size: 1rem;
+}
+
+#profile-summary p {
+    margin: 2px 0;
+}
+
+#summary-avatar {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+}
+
+/* 비밀번호 변경 완료 등 알림용 모달 (화면 중앙, 어두운 배경 오버레이) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+.modal-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 24px 28px;
+    min-width: 260px;
+    max-width: 320px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    text-align: center;
+}
+.modal-message {
+    font-size: 1rem;
+    color: #000;
+    margin-bottom: 18px;
+    line-height: 1.4;
+}
+/* 모달 안 확인 실패 시 뜨는 에러 한 줄(별명 변경/구매/교환/수령 등 공용).
+   이전에는 nickname-error/receive-confirm-error/price-error로 페이지마다
+   이름이 갈리고 각자 CSS에 중복 정의되어 있었음(2026-09 다듬기 세션에서
+   modal-error로 통일). */
+.modal-error {
+    font-size: 0.7rem;
+    color: #cc3333;
+    white-space: pre-line;
+}
+.modal-actions {
+    display: flex;
+    justify-content: center;
+}
+.modal-actions button {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 6px 24px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: #4444ff;
+    border: 1px solid #4444ff;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.modal-actions button:hover {
+    background: #3333cc;
+}

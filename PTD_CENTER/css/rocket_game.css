@@ -1,0 +1,512 @@
+#rocket-game-content {
+    width: 800px;
+    position: absolute;
+    top: 25px;
+    left: max(50%, 720px);
+    transform: translateX(-50%);
+    background: #F0EEE9d9;
+    border-radius: 10px;
+    font-size: 1rem;
+    padding: 20px;
+    box-sizing: border-box;
+    min-height: 650px;
+}
+
+#game-corner-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 8px 0;
+    margin-bottom: 30px;
+}
+
+/* 평소: 카드 4개가 세로로 나란히 쌓인 목록(각 카드는 가로로 긴 형태). */
+#game-select-list {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 20px;
+    row-gap: 20px;
+}
+
+.game-select-card {
+    position: relative;
+    width: 100%;
+    height: 100px;
+    bottom: auto;
+    right: auto;
+    background: #E7ECF2;
+    border: 1px solid #C7D2DE;
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+.game-select-card:hover {
+    outline: 2px solid #4444ff;
+}
+
+.game-select-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #222;
+    text-align: center;
+}
+
+/* 게임이 선택된 상태: 선택된 카드만 제목처럼 위로 고정되고, 그 아래로
+   실제 게임 화면(#game-play-area)이 펼쳐집니다. 나머지 카드는
+   숨김(JS가 display:none 처리)이라 여기서는 선택된 카드의 스타일만
+   조정하면 됩니다 — 높이를 낮추고 배경을 옅게 해서 "제목 자리"처럼 보이게. */
+.game-select-card.selected {
+    height: 48px;
+    background: #DCE4EE;
+    border-color: #4444ff;
+    margin-bottom: 0;
+}
+.game-select-card.selected .game-select-name {
+    font-size: 1.2rem;
+}
+
+#game-play-area {
+    margin-top: 20px;
+    min-height: 400px;
+}
+
+.coin-balance {
+    position: absolute;
+    top: 25px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    padding: 6px 14px;
+    border: 1px solid #C7D2DE;
+    border-radius: 6px;
+    background: #E7ECF2;
+    font-size: 0.95rem;
+    font-weight: bold;
+}
+.coin-balance .coin-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.coin-balance .coin-icon img {
+    display: block;
+    position: relative;
+    top: -1px;
+}
+
+.modal-actions {
+    gap: 10px;
+}
+.modal-secondary {
+    background: #E7ECF2 !important;
+    border-color: #C7D2DE !important;
+    color: #000 !important;
+}
+.modal-secondary:hover {
+    background: #DCE4EE !important;
+}
+
+/* ══════════════════════════════════════════════
+   포켓몬 슬롯 머신 화면 (#game-play-area 안, data-game="slot" 선택 시)
+   ══════════════════════════════════════════════ */
+.slot-game p {
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+.slot-exchange-row {
+    margin-bottom: 16px;
+}
+
+/* 안내 문구(왼쪽)와 구매하기 버튼(오른쪽)을 양끝 정렬합니다. */
+.slot-exchange-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+/* 다른 화면의 확인/제출 버튼(#pw-change-submit 등)과 같은 파란색 팔레트로
+   통일합니다. */
+#slot-exchange-button {
+    position: relative;
+    width: auto;
+    height: auto;
+    bottom: auto;
+    right: auto;
+    flex-shrink: 0;
+    padding: 4px 14px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #fff;
+    background: #4444ff;
+    border: 1px solid #4444ff;
+    border-radius: 6px;
+    cursor: pointer;
+}
+#slot-exchange-button:hover {
+    background: #3333cc;
+    border-color: #3333cc;
+}
+
+.slot-machine-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 30px;
+}
+
+.slot-machine-card {
+    position: relative;
+    width: auto;
+    height: 85px;
+    bottom: auto;
+    right: auto;
+    border-radius: 12px;
+    box-sizing: border-box;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #000;
+    cursor: pointer;
+}
+/* 1, 4, 5번: 샤이니 톤(진하게) */
+.slot-machine-card.tone-a {
+    background: linear-gradient(135deg, #E6D8A8, #B89A3E);
+    border: 2px solid #8a7222;
+}
+/* 2, 3, 6번: 다크 톤(진하게) */
+.slot-machine-card.tone-b {
+    background: linear-gradient(135deg, #CBB8DE, #8A63AE);
+    border: 2px solid #6b4a8f;
+}
+.slot-machine-card:hover {
+    outline: 2px solid #4444ff;
+}
+.slot-machine-card:disabled {
+    color: #999;
+    border-color: #ccc;
+    cursor: default;
+    outline: none;
+}
+
+/* ══════════════════════════════════════════════
+   찌리리공 뒤집기 화면 (#game-play-area 안, data-game="voltorb" 선택 시)
+   ══════════════════════════════════════════════
+   참고 프로젝트(vanilla-voltorb-flip)의 카드 크기/색상 변수를 그대로
+   가져옵니다: 카드 72px, 테두리 4px, 보드 배경/카드 이미지도 참고
+   프로젝트의 것을 image/voltorbflip/ 아래로 그대로 옮겨와 사용합니다. */
+.voltorb-game p {
+    line-height: 1.6;
+}
+.voltorb-rule-paragraph {
+    margin-bottom: 16px;
+}
+.voltorb-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 16px;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+.voltorb-status-row img {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 0px;
+    position: relative;
+    top: -2px;
+}
+
+.voltorb-board-wrap {
+    display: flex;
+    justify-content: center;
+}
+
+/* 보드: 5x5 카드 + 각 행/열 끝의 힌트 칸(coin.png/voltorb.png 배경)까지
+   포함해 6x6 그리드로 구성합니다(참고 프로젝트의 board__row 6개 구조와
+   동일한 배치를 grid로 재구현). */
+.voltorb-board {
+    display: grid;
+    grid-template-columns: repeat(6, 72px);
+    grid-template-rows: repeat(6, 72px);
+    gap: 8px;
+    padding: 8px;
+    background-image: url(../image/voltorbflip/boardBackground.png);
+    background-size: cover;
+    border-radius: 8px;
+    border: 4px solid #fff;
+    outline: 2px solid #000;
+}
+
+.voltorb-card {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    bottom: auto;
+    right: auto;
+    padding: 0;
+    border: 4px solid #fff;
+    border-radius: 4px;
+    background-color: #35a773;
+    background-image: url(../image/voltorbflip/cardFront.png);
+    background-size: cover;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+.voltorb-card:hover {
+    outline: none;
+    filter: brightness(1.08);
+}
+/* 키보드 포커스 표시(참고 프로젝트와 동일한 빨간 테두리). 마우스 클릭도
+   포커스를 함께 받으므로 클릭 직후에도 이 테두리가 그대로 보입니다. */
+.voltorb-card:focus {
+    outline: none;
+    border-color: #f84935;
+}
+.voltorb-card.flipped {
+    cursor: default;
+    background-image: none;
+}
+.voltorb-card.flipped.value-1 { background-image: url(../image/voltorbflip/cardOne.png); }
+.voltorb-card.flipped.value-2 { background-image: url(../image/voltorbflip/cardTwo.png); }
+.voltorb-card.flipped.value-3 { background-image: url(../image/voltorbflip/cardThree.png); }
+.voltorb-card.flipped.value-voltorb { background-image: url(../image/voltorbflip/cardVoltorb.png); }
+
+/* 카드 앞면 안의 2x2 메모 그리드: 0(좌상)/1(우상)/2(좌하)/3(우하). */
+.voltorb-memo-grid {
+    position: absolute;
+    inset: 3%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+.voltorb-memo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #fdda35;
+    visibility: hidden;
+}
+.voltorb-memo.on {
+    visibility: visible;
+}
+.voltorb-card.flipped .voltorb-memo-grid {
+    display: none;
+}
+
+/* 행/열 힌트 칸: 코인 합계(위)와 찌리리공 개수(아래)를 세로로 나눠 보여줍니다. */
+.voltorb-hint-card {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    bottom: auto;
+    right: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px #000;
+    box-sizing: border-box;
+}
+.voltorb-hint-card .hint-coin {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.voltorb-hint-card .hint-coin img {
+    width: 16px;
+    height: 16px;
+}
+.voltorb-hint-card .hint-voltorb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+}
+.voltorb-hint-card .hint-voltorb img {
+    width: 16px;
+    height: 16px;
+}
+.voltorb-hint-corner {
+    background: transparent;
+}
+
+/* 원작 카드 뒤 색상표(_variables.scss의 5색)를 행/열 힌트 칸에 그대로 사용. */
+.voltorb-hint-row-0 { background-color: #e47c5a; }
+.voltorb-hint-row-1 { background-color: #48b248; }
+.voltorb-hint-row-2 { background-color: #eaab3f; }
+.voltorb-hint-row-3 { background-color: #3c99f9; }
+.voltorb-hint-row-4 { background-color: #c868e5; }
+.voltorb-hint-col-0 { background-color: #e47c5a; }
+.voltorb-hint-col-1 { background-color: #48b248; }
+.voltorb-hint-col-2 { background-color: #eaab3f; }
+.voltorb-hint-col-3 { background-color: #3c99f9; }
+.voltorb-hint-col-4 { background-color: #c868e5; }
+
+/* 우클릭 시 브라우저 기본 컨텍스트 메뉴가 뜨지 않도록 cursor만 살짝
+   구분(실제 차단은 JS의 contextmenu preventDefault). */
+.voltorb-card {
+    -webkit-user-select: none;
+    user-select: none;
+}
+#voltorb-clear-message {
+    white-space: pre-line;
+}
+/* ── 얼음길 퍼즐 ────────
+   실제 게임 로직/랜덤 생성 전, 600x600 보드가 #rocket-game-content(800px) 안에서
+   어떻게 보이는지 확인하기 위한 목적. 10x10, 칸당 60px(원본 82px
+   타일을 CSS로 축소해 그림). */
+.ice-board-wrap {
+    display: flex;
+    justify-content: center;
+    padding-top: 8px;
+}
+.ice-board {
+    position: relative;
+    width: 500px;
+    height: 500px;
+    box-sizing: border-box;
+    padding: 10px; /* (500-480)/2 = 10px, 보드 프레임 테두리 두께 */
+    display: grid;
+    grid-template-columns: repeat(10, 48px);
+    grid-template-rows: repeat(10, 48px);
+    background-image: url(../image/ice/iceboard.png);
+    background-size: cover;
+}
+.ice-tile {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    background-size: cover;
+    background-position: center;
+    box-sizing: border-box;
+}
+.ice-stone {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+}
+.ice-robot {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translate(10px, -5px);
+    z-index: 2;
+}
+.ice-robot img {
+    width: 40px;
+    height: auto;
+}
+.ice-target {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transform: translate(10px, 10px);
+}
+.ice-target img {
+    width: 25px;
+    height: 25px;
+}
+
+/* ── 로봇 선택/이동 인터랙션 (2026-09-08) ──────────────────────
+   로봇별 고유 색(선택 테두리, 십자 하이라이트에 공통 사용). */
+.ice-robot[data-robot="red"] { --robot-color: #e0273d; }
+.ice-robot[data-robot="green"] { --robot-color: #3aa855; }
+.ice-robot[data-robot="Giovanni"] { --robot-color: #1a1a1a; }
+.ice-robot[data-robot="Lance"] { --robot-color: #2b3a8c; }
+
+.ice-robot {
+    cursor: pointer;
+    transition: left 0s linear, top 0s linear; /* JS가 이동 시 duration을 매번 지정 */
+}
+/* 선택된 로봇: 캐릭터 실루엣을 따라가는 테두리(사각 박스가 아님). */
+.ice-robot.selected img {
+    filter:
+        drop-shadow(2px 0 0 var(--robot-color))
+        drop-shadow(-2px 0 0 var(--robot-color))
+        drop-shadow(0 2px 0 var(--robot-color))
+        drop-shadow(0 -2px 0 var(--robot-color));
+}
+
+/* 이동 가능한 방향으로 로봇이 지나갈 경로 전체에 얇은 선(십자 모양)을
+   표시. 실제로 멈추는 칸 하나만이 아니라 시작~끝 전체 구간을 덮는
+   하나의 긴 요소로 만들어서, 그 구간 어디를 클릭해도 이동하도록 함.
+   가로 이동(좌/우)은 가로로 긴 얇은 띠, 세로 이동(위/아래)은 세로로
+   긴 얇은 띠 — 칸 크기(48px)의 1/3(16px) 두께. */
+.ice-move-highlight {
+    position: absolute;
+    cursor: pointer;
+    background-color: var(--hl-color);
+    opacity: 0.35;
+    transform: translate(10px, 10px);
+    z-index: 1;
+}
+.ice-move-highlight:hover {
+    opacity: 0.55;
+}
+.ice-move-highlight.horizontal {
+    height: 16px;
+}
+.ice-move-highlight.vertical {
+    width: 16px;
+}
+
+/* ── 게임코너 이용방법 (2026-09-08) ────────────────────────────
+   슬롯머신/찌리리공/얼음길 설명 버튼 3개 + 설명 영역. 기존
+   .game-select-card 팔레트(옅은 회청색 배경, 파란 강조색)를 그대로
+   가져와 톤을 통일함. */
+.game-guide-button-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.game-guide-button {
+    position: relative;
+    width: auto;
+    height: auto;
+    bottom: auto;
+    right: auto;
+    flex: 1;
+    padding: 10px 0;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #222;
+    background: #E7ECF2;
+    border: 1px solid #C7D2DE;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.game-guide-button:hover {
+    outline: 2px solid #4444ff;
+}
+.game-guide-button.selected {
+    background: #DCE4EE;
+    border-color: #4444ff;
+    color: #4444ff;
+}
+.game-guide-panel {
+    background: #E7ECF2;
+    border: 1px solid #C7D2DE;
+    border-radius: 8px;
+    padding: 16px;
+    line-height: 1.7;
+    font-size: 0.95rem;
+}

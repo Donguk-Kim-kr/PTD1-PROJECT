@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTD 포켓몬 센터</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/base.css">
+    <link rel="stylesheet" href="./css/about.css">
+</head>
+<body>
+    <div class="wrapper">
+        <header id="head"><span id="notice">
+            한국 PTD 포켓몬센터에 오신 것을 환영합니다.
+        </span></header>
+        <nav id="menu">
+            <ul>
+                <li class="tab"><a href="https://samdangames.blogspot.com/" target="_blank">샘의 블로그</a></li>
+                <li class="tab"><a href="/">홈</a></li>
+                <li class="tab has-sub">
+                    <a href="#">인벤토리</a>
+                    <ul class="submenu">
+                        <li><a href="/inventory_pokemon">포켓몬</a></li>
+                        <li><a href="/inventory_bag">가방</a></li>
+                        <li><a href="/inventory_avatar">아바타</a></li>
+                    </ul>
+                </li>
+                <li class="tab has-sub">
+                    <a href="#">트레이드 센터</a>
+                    <ul class="submenu">
+                        <li><a href="/trade_own">보유 포켓몬</a></li>
+                        <li><a href="/trade_offer">통신 교환 대기</a></li>
+                        <li><a href="/trade_market">통신 교환 검색</a></li>
+                        <li><a href="/trade_receive">포켓몬 수령</a></li>
+                    </ul>
+                </li>
+                <li class="tab has-sub">
+                    <a href="#">무지개 게임코너</a>
+                    <ul class="submenu">
+                        <li><a href="/rocket_game">미니 게임 코너</a></li>
+                        <li><a href="/rocket_pokemon">포켓몬 경품 코너</a></li>
+                        <li><a href="/rocket_avatar">아바타 경품 코너</a></li>
+                        <li><a href="/rocket_receive">경품 수령</a></li>
+                    </ul>
+                </li>
+                <li class="tab"><a href="/about">소개 및 문의</a></li>
+            </ul>
+        </nav>
+        <div id="background">
+            <main>
+                <aside>
+                    <fieldset id="login">
+                        <legend>트레이너 확인</legend>
+                        <form>
+                            <label id="mail">이메일:</label>
+                            <input type="email" /><br>
+                            <label id="pass">비밀번호:</label>
+                            <input type="password" />
+                        </form>
+                        <p id="login-error" style="display: none;"><b>로그인 정보가 올바르지 않습니다.</b></p>
+                        <a href="#" id="forget">비밀번호 찾기</a>
+                        <button>로그인</button>
+                    </fieldset>
+                    <fieldset id="welcome" style="display: none;">
+                        <legend>트레이너</legend>
+                        <p id="welcome-email">test@example.com</p>
+                        <div id="profile-row">
+                            <label id="profile-label">프로필 선택</label>
+                            <select id="profile-select">
+                                <option value="" id="profile-placeholder">프로필 선택</option>
+                                <option value="1">프로필 슬롯 1</option>
+                                <option value="2">프로필 슬롯 2</option>
+                                <option value="3">프로필 슬롯 3</option>
+                            </select>
+                        </div>
+                        <div id="profile-summary-row" style="display: none;">
+                            <div id="profile-summary">
+                                <p><b>이름</b> : <span id="summary-name">한지우</span></p>
+                                <p><b>포켓몬</b> : <span id="summary-pokemon">100</span></p>
+                                <p><b>배지</b> : <span id="summary-badges">8</span></p>
+                                <p><b>버전</b> : <span id="summary-version">레드</span></p>
+                            </div>
+                            <img id="summary-avatar" src="./image/avatar/b_1_y.png" alt="아바타">
+                        </div>
+                        <a href="#" id="pw-change">비밀번호 바꾸기</a>
+                        <button>로그아웃</button>
+                    </fieldset>
+                    <fieldset id="pw-change-panel" style="display:none;">
+                        <div class="pw-row">
+                            <label for="pw-current">현재 비밀번호</label>
+                            <input type="password" id="pw-current">
+                        </div>
+                        <div class="pw-verify-row">
+                            <button type="button" id="pw-verify-button">확인</button>
+                            <p id="pw-verify-result" class="pw-verify-result" style="display:none;"></p>
+                        </div>
+                        <div class="pw-row">
+                            <label for="pw-new">새 비밀번호</label>
+                            <input type="password" id="pw-new">
+                        </div>
+                        <div class="pw-row">
+                            <label for="pw-new-confirm">새 비밀번호 확인</label>
+                            <input type="password" id="pw-new-confirm">
+                        </div>
+                        <p id="pw-change-error" class="pw-change-error" style="display:none;"></p>
+                        <div class="pw-change-actions">
+                            <button type="button" id="pw-change-submit" disabled>변경하기</button>
+                            <button type="button" id="pw-change-cancel">취소</button>
+                        </div>
+                    </fieldset>
+                </aside>
+                <div id="about">
+                    <p>
+                        <b id="about-title">인사 및 제작 배경</b>
+                    </p>
+                    <p>
+                        안녕하세요. 한국 PTD 포켓몬센터의 제작자입니다.<br>
+                        저는 2026년 5월부터 개발자 공부를 시작했습니다.<br>
+                        그러던 중 문득 10년 전에 플레이했던 PTD 게임이 생각났습니다. <br>
+                        플레이를 하다보니 스토리도 영어, 포켓몬 이름도 영어, 기술 이름도 영어...<br>
+                        한국어로 플레이하고 싶다는 생각에 번역을 시작하게 되었고,<br>
+                        한국 PTD 포켓몬센터까지 만들고 싶어졌습니다.<br>
+                        이 작업이 단순한 취미가 아니라 공부에도 도움이 될 것 같았습니다.
+                    </p>
+                    <p>
+                        2021년, Adobe Flash의 지원이 끝나면서<br>
+                        원작자인 Sam 또한 게임에 대한 지원을 종료했습니다.<br>
+                        비록 오래된 플래시 게임이고, 게임에 대한 지원도 종료되었지만<br>
+                        포켓몬스터는 여전히 많은 사랑을 받고 있습니다.<br>
+                        한국어 버전을 완성한다면 국내에서도 소소하게 즐기는 분들이 생기길 바랍니다.<br>
+                        공부를 하고 있는 학생이니, 미흡하더라도 재미있게 즐겨주시길 부탁드립니다.<br>
+                        감사합니다.
+                    </p>
+                    <p>
+                        문의는 <span id="contact-link">여기</span>로 부탁드립니다.<br>
+                        12345678910
+                    </p>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="./js/auth.js"></script>
+    <script src="./js/about.js"></script>
+</body>
+</html>

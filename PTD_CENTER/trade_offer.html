@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTD 포켓몬 센터</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/base.css">
+    <link rel="stylesheet" href="./css/trade_offer.css">
+</head>
+<body>
+    <div class="wrapper">
+        <header id="head"><span id="notice">
+            한국 PTD 포켓몬센터에 오신 것을 환영합니다.
+        </span></header>
+        <nav id="menu">
+            <ul>
+                <li class="tab"><a href="https://samdangames.blogspot.com/" target="_blank">샘의 블로그</a></li>
+                <li class="tab"><a href="/">홈</a></li>
+                <li class="tab has-sub">
+                    <a href="#">인벤토리</a>
+                    <ul class="submenu">
+                        <li><a href="/inventory_pokemon">포켓몬</a></li>
+                        <li><a href="/inventory_bag">가방</a></li>
+                        <li><a href="/inventory_avatar">아바타</a></li>
+                    </ul>
+                </li>
+                <li class="tab has-sub">
+                    <a href="#">트레이드 센터</a>
+                    <ul class="submenu">
+                        <li><a href="/trade_own">보유 포켓몬</a></li>
+                        <li><a href="/trade_offer">통신 교환 대기</a></li>
+                        <li><a href="/trade_market">통신 교환 검색</a></li>
+                        <li><a href="/trade_receive">포켓몬 수령</a></li>
+                    </ul>
+                </li>
+                <li class="tab has-sub">
+                    <a href="#">무지개 게임코너</a>
+                    <ul class="submenu">
+                        <li><a href="/rocket_game">미니 게임 코너</a></li>
+                        <li><a href="/rocket_pokemon">포켓몬 경품 코너</a></li>
+                        <li><a href="/rocket_avatar">아바타 경품 코너</a></li>
+                        <li><a href="/rocket_receive">경품 수령</a></li>
+                    </ul>
+                </li>
+                <li class="tab"><a href="/about">소개 및 문의</a></li>
+            </ul>
+        </nav>
+        <div id="background">
+            <main>
+                <aside>
+                    <fieldset id="welcome">
+                        <legend>트레이너</legend>
+                        <p id="welcome-email">test@example.com</p>
+                        <div id="profile-row">
+                            <label id="profile-label">프로필 선택</label>
+                            <select id="profile-select">
+                                <option value="" id="profile-placeholder">프로필 선택</option>
+                                <option value="1">프로필 슬롯 1</option>
+                                <option value="2">프로필 슬롯 2</option>
+                                <option value="3">프로필 슬롯 3</option>
+                            </select>
+                        </div>
+                        <div id="profile-summary-row" style="display: none;">
+                            <div id="profile-summary">
+                                <p><b>이름</b> : <span id="summary-name">한지우</span></p>
+                                <p><b>포켓몬</b> : <span id="summary-pokemon">100</span></p>
+                                <p><b>배지</b> : <span id="summary-badges">8</span></p>
+                                <p><b>버전</b> : <span id="summary-version">레드</span></p>
+                            </div>
+                            <img id="summary-avatar" src="./image/avatar/b_1_y.png" alt="아바타">
+                        </div>
+                        <a href="#" id="pw-change">비밀번호 바꾸기</a>
+                        <button>로그아웃</button>
+                    </fieldset>
+                    <fieldset id="pw-change-panel" style="display:none;">
+                        <div class="pw-row">
+                            <label for="pw-current">현재 비밀번호</label>
+                            <input type="password" id="pw-current">
+                        </div>
+                        <div class="pw-verify-row">
+                            <button type="button" id="pw-verify-button">확인</button>
+                            <p id="pw-verify-result" class="pw-verify-result" style="display:none;"></p>
+                        </div>
+                        <div class="pw-row">
+                            <label for="pw-new">새 비밀번호</label>
+                            <input type="password" id="pw-new">
+                        </div>
+                        <div class="pw-row">
+                            <label for="pw-new-confirm">새 비밀번호 확인</label>
+                            <input type="password" id="pw-new-confirm">
+                        </div>
+                        <p id="pw-change-error" class="pw-change-error" style="display:none;"></p>
+                        <div class="pw-change-actions">
+                            <button type="button" id="pw-change-submit" disabled>변경하기</button>
+                            <button type="button" id="pw-change-cancel">취소</button>
+                        </div>
+                    </fieldset>
+                </aside>
+                <div id="trade-offer-content">
+                    <h3 class="trade-title">통신 교환 대기</h3>
+
+                    <div class="pokemon-toolbar">
+                        <div class="sort-buttons" id="sort-buttons">
+                            <button type="button" class="sort-button active" data-sort="dex">도감번호</button>
+                            <button type="button" class="sort-button" data-sort="name">이름</button>
+                            <button type="button" class="sort-button" data-sort="level">레벨</button>
+                        </div>
+                        <div class="filter-wrap">
+                            <button type="button" class="filter-button" id="filter-button">필터</button>
+                            <div class="filter-panel" id="filter-panel" style="display:none;">
+                                <label class="filter-all"><span>전체</span><input type="checkbox" id="filter-all-checkbox" checked></label>
+                                <label><span>노말</span><input type="checkbox" value="노말" checked></label>
+                                <label><span>불꽃</span><input type="checkbox" value="불꽃" checked></label>
+                                <label><span>격투</span><input type="checkbox" value="격투" checked></label>
+                                <label><span>물</span><input type="checkbox" value="물" checked></label>
+                                <label><span>비행</span><input type="checkbox" value="비행" checked></label>
+                                <label><span>풀</span><input type="checkbox" value="풀" checked></label>
+                                <label><span>독</span><input type="checkbox" value="독" checked></label>
+                                <label><span>전기</span><input type="checkbox" value="전기" checked></label>
+                                <label><span>땅</span><input type="checkbox" value="땅" checked></label>
+                                <label><span>에스퍼</span><input type="checkbox" value="에스퍼" checked></label>
+                                <label><span>바위</span><input type="checkbox" value="바위" checked></label>
+                                <label><span>얼음</span><input type="checkbox" value="얼음" checked></label>
+                                <label><span>벌레</span><input type="checkbox" value="벌레" checked></label>
+                                <label><span>드래곤</span><input type="checkbox" value="드래곤" checked></label>
+                                <label><span>고스트</span><input type="checkbox" value="고스트" checked></label>
+                                <label><span>악</span><input type="checkbox" value="악" checked></label>
+                                <label><span>강철</span><input type="checkbox" value="강철" checked></label>
+                                <label><span>페어리</span><input type="checkbox" value="페어리" checked></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="trade-offer-list" id="trade-offer-list">
+                        <!-- trade_offer.js가 .trade-offer-card를 여기 채웁니다 -->
+                    </div>
+                    <div class="pagination" id="pokemon-pagination">
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 카드 템플릿 (JS에서 clone하여 사용) -->
+    <template id="trade-offer-card-template">
+        <div class="trade-offer-card">
+            <div class="card-left">
+                <img class="sprite" src="" alt="">
+                <img class="status-icon" src="" alt="모습">
+                <div class="name"></div>
+                <div class="level"></div>
+            </div>
+            <div class="card-mid">
+                <div class="nickname-row">별명 : <span class="nickname-value"></span></div>
+                <div class="move-table"></div>
+                <div class="card-actions">
+                    <button type="button" class="card-action-link action-edit"><span class="link-text">교환 조건 수정</span></button>
+                    <button type="button" class="card-action-link action-cancel"><span class="link-text">통신 교환 취소</span></button>
+                </div>
+            </div>
+            <div class="card-divider"></div>
+            <div class="card-conditions">
+                <table class="condition-table">
+                    <tbody class="condition-tbody">
+                        <!-- 읽기전용 또는 편집가능 .condition-row로 채워짐 -->
+                    </tbody>
+                </table>
+                <button type="button" class="add-condition-button" style="display:none;">+ 추가</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- 조건 행 템플릿: 읽기 전용 (기본 표시 모드) -->
+    <template id="condition-row-readonly-template">
+        <tr class="condition-row-readonly">
+            <td class="cond-dex"></td>
+            <td class="cond-name"></td>
+            <td class="cond-type"></td>
+            <td class="cond-level"></td>
+            <td class="cond-form-readonly"></td>
+        </tr>
+    </template>
+
+    <!-- 조건 행 템플릿: 편집 가능 (수정 모드, trade_own과 동일) -->
+    <template id="condition-row-template">
+        <tr class="condition-row">
+            <td class="cond-dex">전체</td>
+            <td class="cond-name">
+                <button type="button" class="cond-pick-button">포켓몬 선택</button>
+            </td>
+            <td class="cond-type">타입</td>
+            <td class="cond-level">
+                <select class="cond-level-value">
+                    <option value="" selected>레벨</option>
+                </select>
+                <select class="cond-level-op" disabled>
+                    <option value="일치">일치</option>
+                    <option value="이상">이상</option>
+                    <option value="이하">이하</option>
+                </select>
+            </td>
+            <td class="cond-form">
+                <div class="form-toggle-group">
+                    <button type="button" class="form-toggle-btn" data-form="0" aria-pressed="false">
+                        <img src="./image/ball/normal.png" alt="일반">
+                    </button>
+                    <button type="button" class="form-toggle-btn" data-form="1" aria-pressed="false">
+                        <img src="./image/ball/shiny.png" alt="샤이니">
+                    </button>
+                    <button type="button" class="form-toggle-btn" data-form="2" aria-pressed="false">
+                        <img src="./image/ball/dark.png" alt="다크">
+                    </button>
+                </div>
+            </td>
+            <td class="cond-remove"><button type="button" class="condition-remove-btn" aria-label="조건 삭제">✕</button></td>
+        </tr>
+    </template>
+
+    <!-- 조건 수정 완료: 확인 팝업 -->
+    <div class="modal-overlay" id="edit-confirm-modal" style="display:none;">
+        <div class="modal-card register-confirm-card">
+            <p class="modal-message">이 조건으로 수정하시겠습니까?</p>
+            <table class="register-confirm-table">
+                <tbody id="edit-confirm-tbody"></tbody>
+            </table>
+            <div class="modal-actions">
+                <button type="button" id="edit-confirm-yes">수정</button>
+                <button type="button" id="edit-confirm-no" class="modal-secondary">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 교환 취소: 확인 팝업 -->
+    <div class="modal-overlay" id="cancel-confirm-modal" style="display:none;">
+        <div class="modal-card">
+            <p class="modal-message">통신 교환을 취소하시겠습니까?<br>포켓몬은 <b>보유 포켓몬</b> 페이지로 이동합니다.</p>
+            <div class="modal-actions">
+                <button type="button" id="cancel-confirm-yes">교환 취소</button>
+                <button type="button" id="cancel-confirm-no" class="modal-secondary">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 포켓몬 선택 모달 -->
+    <div class="modal-overlay" id="pick-modal" style="display:none;">
+        <div class="pick-modal">
+            <div class="pick-modal-header">
+                <span class="pick-modal-title">포켓몬 선택</span>
+                <button type="button" class="pick-modal-close" id="pick-modal-close">✕</button>
+            </div>
+            <div class="pick-modal-search-row">
+                <input type="text" class="pick-modal-search" id="pick-modal-search" placeholder="이름 또는 도감번호로 검색">
+                <div class="pick-sort-buttons" id="pick-sort-buttons">
+                    <button type="button" class="sort-button active" data-sort="dex">도감번호</button>
+                    <button type="button" class="sort-button" data-sort="name">이름</button>
+                </div>
+                <div class="filter-wrap">
+                    <button type="button" class="pick-modal-filter-btn" id="pick-filter-button">필터</button>
+                    <div class="filter-panel" id="pick-filter-panel" style="display:none;">
+                        <label class="filter-all"><span>전체</span><input type="checkbox" id="pick-filter-all-checkbox" checked></label>
+                        <label><span>노말</span><input type="checkbox" value="노말" checked></label>
+                        <label><span>불꽃</span><input type="checkbox" value="불꽃" checked></label>
+                        <label><span>격투</span><input type="checkbox" value="격투" checked></label>
+                        <label><span>물</span><input type="checkbox" value="물" checked></label>
+                        <label><span>비행</span><input type="checkbox" value="비행" checked></label>
+                        <label><span>풀</span><input type="checkbox" value="풀" checked></label>
+                        <label><span>독</span><input type="checkbox" value="독" checked></label>
+                        <label><span>전기</span><input type="checkbox" value="전기" checked></label>
+                        <label><span>땅</span><input type="checkbox" value="땅" checked></label>
+                        <label><span>에스퍼</span><input type="checkbox" value="에스퍼" checked></label>
+                        <label><span>바위</span><input type="checkbox" value="바위" checked></label>
+                        <label><span>얼음</span><input type="checkbox" value="얼음" checked></label>
+                        <label><span>벌레</span><input type="checkbox" value="벌레" checked></label>
+                        <label><span>드래곤</span><input type="checkbox" value="드래곤" checked></label>
+                        <label><span>고스트</span><input type="checkbox" value="고스트" checked></label>
+                        <label><span>악</span><input type="checkbox" value="악" checked></label>
+                        <label><span>강철</span><input type="checkbox" value="강철" checked></label>
+                        <label><span>페어리</span><input type="checkbox" value="페어리" checked></label>
+                    </div>
+                </div>
+                <button type="button" class="pick-modal-confirm-btn" id="pick-confirm-btn" disabled>확인</button>
+            </div>
+            <div class="pick-grid" id="pick-grid"></div>
+            <div class="pick-modal-footer" id="pick-pagination"></div>
+        </div>
+    </div>
+
+    <!-- 포켓몬 선택 카드 템플릿 -->
+    <template id="pick-card-template">
+        <div class="pick-card" tabindex="0">
+            <img class="pick-sprite" src="" alt="">
+            <div class="pick-name"></div>
+        </div>
+    </template>
+
+    <script src="./js/auth.js"></script>
+    <script src="./js/trade_offer.js"></script>
+</body>
+</html>

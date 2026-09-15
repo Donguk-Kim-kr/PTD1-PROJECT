@@ -1,0 +1,107 @@
+#inventory-bag-content {
+    width: 700px;
+    position: absolute;
+    top: 25px;
+    left: max(50%, 670px);
+    transform: translateX(-50%);
+    background: #F0EEE9d9;
+    border-radius: 10px;
+    font-size: 1rem;
+    padding: 20px;
+    box-sizing: border-box;
+    min-height: 574px;
+}
+
+.inv-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 8px 0;
+    margin-bottom: 30px;
+}
+
+.inv-section {
+    margin: 30px 0;
+}
+
+.inv-section:last-child {
+    margin-bottom: 0;
+}
+
+.inv-section h4 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.inv-title + .inv-section {
+    margin-top: 0;
+}
+
+.badge-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    width: 100%;
+}
+
+.tool-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    width: 100%;
+}
+
+.badge-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.item-slot {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge-icon {
+    width: 60px;
+    height: 60px;
+}
+
+.item-slot img {
+    width: 50px;
+    height: 50px;
+}
+
+.stone-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    width: 100%;
+    row-gap: 20px;
+}
+
+.item-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.item-visual img {
+    width: 50px;
+    height: 50px;
+}
+
+.item-visual span {
+    white-space: nowrap;
+}
+
+.item-count {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #000;
+}
+
+.item-name-hidden {
+    visibility: hidden;
+}

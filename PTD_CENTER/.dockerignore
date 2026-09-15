@@ -1,0 +1,20 @@
+.git/
+.gitignore
+README.md
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+migrate_to_postgres.py
+
+PTD작업/
+SIN/
+SQLite_백업폴더/
+
+# 데이터베이스 파일
+
+# 운영체제 자동 생성 파일
+.DS_Store
+Thumbs.db
