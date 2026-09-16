@@ -11,7 +11,7 @@ from fastapi.responses import PlainTextResponse
 
 from auth import get_db, get_account_by_token, password_hasher
 from move_data import get_move_name_by_num
-from pokemon_data import NON_PLAYABLE_DEX_NUMBERS
+from pokemon_data import NON_PLAYABLE_DEX_NUMBERS, get_pokemon_name_by_num
 from urllib.parse import quote
 
 router = APIRouter()
@@ -381,3 +381,43 @@ def web_change_password(
     conn.close()
 
     return {"success": True, "verified_only": False}
+
+
+# ══════════════════════════════════════════════
+# /api/web/mysterycode_list — 웹 전용, 원본에 없는 신규 기능
+# ══════════════════════════════════════════════
+# 로그인 여부와 무관하게, 현재 활성화된 이상한소포 코드 전체를 공개로
+# 보여주는 페이지(mysterycode.html)용 엔드포인트입니다.
+# master_routes.master_mysterycode_list()(관리자 전용, 비활성 포함, 최신순)와
+# 겹치는 로직이지만 세 가지가 다릅니다: 인증 없음 / 활성(활성여부=1)만 / 번호
+# 오름차순(오래된 코드가 먼저). 번호·활성여부·설명은 이 화면에서 쓰지 않으므로
+# 응답에 포함하지 않습니다.
+@router.post("/api/web/mysterycode_list")
+def web_mysterycode_list():
+    conn = get_db()
+    rows = conn.execute("""
+        SELECT 코드, 도감_번호, 모습, 레벨, 기술1, 기술2, 기술3, 기술4, 사용가능
+        FROM 이상한소포
+        WHERE 활성여부 = 1
+        ORDER BY 번호 ASC
+    """).fetchall()
+    conn.close()
+
+    codes = []
+    for row in rows:
+        codes.append({
+            "code": row["코드"],
+            "dex": row["도감_번호"],
+            "pokemon_name": get_pokemon_name_by_num(row["도감_번호"]),
+            "form": row["모습"],
+            "level": row["레벨"],
+            "move_names": [
+                get_move_name_by_num(row["기술1"]) if row["기술1"] else None,
+                get_move_name_by_num(row["기술2"]) if row["기술2"] else None,
+                get_move_name_by_num(row["기술3"]) if row["기술3"] else None,
+                get_move_name_by_num(row["기술4"]) if row["기술4"] else None,
+            ],
+            "max_uses": row["사용가능"],
+        })
+
+    return {"success": True, "codes": codes}

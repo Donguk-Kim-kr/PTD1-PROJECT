@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTD 포켓몬 센터</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/base.css">
+    <link rel="stylesheet" href="./css/play.css">
+</head>
+<body>
+    <div class="wrapper">
+        <header id="head"><span id="notice">
+            한국 PTD 포켓몬센터에 오신 것을 환영합니다.
+        </span></header>
+        <nav id="menu">
+            <ul>
+                <li class="tab"><a href="https://samdangames.blogspot.com/" target="_blank">샘의 블로그</a></li>
+                <li class="tab"><a href="/">홈</a></li>
+                <li class="tab"><a href="/play">게임 플레이</a></li>
+                <li class="tab has-sub">
+                    <a href="#">인벤토리</a>
+                    <ul class="submenu">
+                        <li><a href="/inventory_pokemon">포켓몬</a></li>
+                        <li><a href="/inventory_bag">가방</a></li>
+                        <li><a href="/inventory_avatar">아바타</a></li>
+                    </ul>
+                </li>
+                <li class="tab has-sub">
+                    <a href="#">트레이드 센터</a>
+                    <ul class="submenu">
+                        <li><a href="/trade_own">보유 포켓몬</a></li>
+                        <li><a href="/trade_offer">통신 교환 대기</a></li>
+                        <li><a href="/trade_market">통신 교환 검색</a></li>
+                        <li><a href="/trade_receive">포켓몬 수령</a></li>
+                    </ul>
+                </li>
+                <li class="tab has-sub">
+                    <a href="#">무지개 게임코너</a>
+                    <ul class="submenu">
+                        <li><a href="/rocket_game">미니 게임 코너</a></li>
+                        <li><a href="/rocket_pokemon">포켓몬 경품 코너</a></li>
+                        <li><a href="/rocket_avatar">아바타 경품 코너</a></li>
+                        <li><a href="/rocket_receive">경품 수령</a></li>
+                    </ul>
+                </li>
+                <li class="tab"><a href="/mysterycode">이상한 소포</a></li>
+                <li class="tab"><a href="/about">소개 및 문의</a></li>
+            </ul>
+        </nav>
+        <div id="background">
+            <main>
+                <div id="play-content">
+                    <div id="ruffle-container"></div>
+                    <div id="play-controls">
+                        <button type="button" id="btn-fullscreen" title="전체화면">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+                                <path d="M16 3h3a2 2 0 0 1 2 2v3"/>
+                                <path d="M8 21H5a2 2 0 0 1-2-2v-3"/>
+                                <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+                            </svg>
+                        </button>
+                        <button type="button" id="btn-pip" title="PIP로 보기">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="16" rx="2"/>
+                                <rect x="12" y="12" width="7" height="6" rx="1" fill="currentColor" stroke="none"/>
+                            </svg>
+                        </button>
+                        <button type="button" id="btn-mute" title="음소거">
+                            <svg id="icon-sound-on" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 9v6h4l5 5V4L8 9H4z"/>
+                                <path d="M17.5 8.5a5 5 0 0 1 0 7"/>
+                                <path d="M20 6a9 9 0 0 1 0 12"/>
+                            </svg>
+                            <svg id="icon-sound-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                                <path d="M4 9v6h4l5 5V4L8 9H4z"/>
+                                <path d="M22 9l-6 6"/>
+                                <path d="M16 9l6 6"/>
+                            </svg>
+                        </button>
+                        <button type="button" id="btn-restart" title="재시작">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12a9 9 0 1 1-3-6.7"/>
+                                <path d="M21 3v6h-6"/>
+                            </svg>
+                        </button>
+                        <button type="button" id="btn-stop" title="종료">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none">
+                                <rect x="6" y="6" width="12" height="12" rx="1"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p id="play-help">
+                        <span class="help-item">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+                                <path d="M16 3h3a2 2 0 0 1 2 2v3"/>
+                                <path d="M8 21H5a2 2 0 0 1-2-2v-3"/>
+                                <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+                            </svg>
+                            전체화면
+                        </span>
+                        <span class="help-item">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="16" rx="2"/>
+                                <rect x="12" y="12" width="7" height="6" rx="1" fill="currentColor" stroke="none"/>
+                            </svg>
+                            PIP(작은 창으로 보기)
+                        </span>
+                        <span class="help-item">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 9v6h4l5 5V4L8 9H4z"/>
+                                <path d="M17.5 8.5a5 5 0 0 1 0 7"/>
+                                <path d="M20 6a9 9 0 0 1 0 12"/>
+                            </svg>
+                            음소거
+                        </span>
+                        <span class="help-item">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12a9 9 0 1 1-3-6.7"/>
+                                <path d="M21 3v6h-6"/>
+                            </svg>
+                            재시작
+                        </span>
+                        <span class="help-item">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none">
+                                <rect x="6" y="6" width="12" height="12" rx="1"/>
+                            </svg>
+                            종료
+                        </span>
+                        <br>
+                        <span class="play-help-note">※ PIP 모드 진입 및 종료 시 게임 진행 상황은 초기화됩니다.</span>
+                        <br>
+                        <span class="play-help-note">※ PIP 창은 Always on top(항상 위에) 기능이 적용됩니다.</span>
+                    </p>
+                </div>
+            </main>
+            <footer id="site-footer">
+                © 2026 PTD 한국어 팬 페이지 | Pokémon은 Nintendo, Creatures Inc., GAME FREAK inc.의 자산입니다 | PTD 원작자: Sam
+            </footer>
+        </div>
+    </div>
+    <script src="./ruffle-0.6.0/ruffle.js"></script>
+    <script src="./js/play.js"></script>
+</body>
+</html>

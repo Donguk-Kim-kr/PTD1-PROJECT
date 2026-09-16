@@ -1,0 +1,192 @@
+#site-footer {
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #F0EEE9d9;
+    text-align: center;
+    font-size: 12px;
+    padding: 8px 15px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+#mysterycode-content {
+    width: 800px;
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #F0EEE9d9;
+    border-radius: 10px;
+    font-size: 1rem;
+    padding: 20px;
+    box-sizing: border-box;
+    min-height: 620px;
+}
+
+.mysterycode-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 8px 0;
+    margin-bottom: 30px;
+}
+
+.mysterycode-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    min-height: 350px;
+    align-items: center;
+}
+
+.mysterycode-card {
+    position: relative;
+    width: 725px;
+    height: 100px;
+    background: #E7ECF2;
+    border: 1px solid #C7D2DE;
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 12px;
+}
+
+.mysterycode-card.form-1 {
+    background: #F1EAD0;
+    border-color: #E6D8A8;
+}
+.mysterycode-card.form-2 {
+    background: #EDE3F5;
+    border-color: #CBB8DE;
+}
+
+/* 코드 - 이미지 - 이름 - 레벨을 한 줄로 나열 */
+.mysterycode-card .card-info-row {
+    flex: 0 0 340px;
+    display: flex;
+    align-items: stretch;
+}
+
+/* 칸(cell): 폭, 좌우/상하 가운데 정렬, 선 유무를 여기서 담당.
+   선을 켜려면 border-right: 1px solid #C7D2DE; 를 추가하면 됨. */
+.mysterycode-card .cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+.mysterycode-card .cell-code {
+    flex: 0 0 110px;
+}
+.mysterycode-card .cell-sprite {
+    flex: 0 0 70px;
+}
+.mysterycode-card .cell-name {
+    flex: 0 0 80px;
+}
+.mysterycode-card .cell-level {
+    flex: 0 0 80px;
+}
+
+.mysterycode-card .code-value {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #000;
+    word-break: break-all;
+    text-align: center;
+}
+.mysterycode-card .sprite {
+    width: 60px;
+    height: 60px;
+    image-rendering: pixelated;
+}
+.mysterycode-card .name {
+    font-size: 1rem;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.mysterycode-card .level-row {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #000;
+    white-space: nowrap;
+}
+
+/* 세로 구분선 */
+.mysterycode-card .card-divider {
+    flex: 0 0 1px;
+    align-self: stretch;
+    background: #C7D2DE;
+    margin: 4px 0;
+}
+
+/* 기술표: 기존 trade_own 카드의 move-table과 동일한 크기 */
+.mysterycode-card .move-table {
+    flex: 0 0 200px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(2, auto);
+    min-height: 50px;
+    gap: 1px 6px;
+    padding: 3px 0;
+}
+.mysterycode-card .move-cell {
+    font-size: 0.9rem;
+    color: #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+}
+
+.mysterycode-card .uses-row {
+    flex: 1 1 auto;
+    font-size: 1rem;
+    color: #000;
+    white-space: nowrap;
+}
+
+.pagination {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+.pagination button {
+    position: static;
+    min-width: 32px;
+    width: auto;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #C7D2DE;
+    background: #F0EEE9;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+.pagination button:hover {
+    background: #E7ECF2;
+}
+.pagination button.active {
+    background: #4444ff;
+    border-color: #4444ff;
+    color: #fff;
+    font-weight: bold;
+    cursor: default;
+}
+.pagination button:disabled {
+    color: #aaa;
+    cursor: default;
+    background: #F0EEE9;
+}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTD 포켓몬 센터</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/base.css">
+    <link rel="stylesheet" href="./css/mysterycode.css">
+</head>
+<body>
+    <div class="wrapper">
+        <header id="head"><span id="notice">
+            한국 PTD 포켓몬센터에 오신 것을 환영합니다.
+        </span></header>
+        <nav id="menu">
+            <ul>
+                <li class="tab"><a href="https://samdangames.blogspot.com/" target="_blank">샘의 블로그</a></li>
+                <li class="tab"><a href="/">홈</a></li>
+                <li class="tab"><a href="/play">게임 플레이</a></li>
+                <li class="tab has-sub">
+                    <a href="#">인벤토리</a>
+                    <ul class="submenu">
+                        <li><a href="/inventory_pokemon">포켓몬</a></li>
+                        <li><a href="/inventory_bag">가방</a></li>
+                        <li><a href="/inventory_avatar">아바타</a></li>
+                    </ul>
+                </li>
+                <li class="tab has-sub">
+                    <a href="#">트레이드 센터</a>
+                    <ul class="submenu">
+                        <li><a href="/trade_own">보유 포켓몬</a></li>
+                        <li><a href="/trade_offer">통신 교환 대기</a></li>
+                        <li><a href="/trade_market">통신 교환 검색</a></li>
+                        <li><a href="/trade_receive">포켓몬 수령</a></li>
+                    </ul>
+                </li>
+                <li class="tab has-sub">
+                    <a href="#">무지개 게임코너</a>
+                    <ul class="submenu">
+                        <li><a href="/rocket_game">미니 게임 코너</a></li>
+                        <li><a href="/rocket_pokemon">포켓몬 경품 코너</a></li>
+                        <li><a href="/rocket_avatar">아바타 경품 코너</a></li>
+                        <li><a href="/rocket_receive">경품 수령</a></li>
+                    </ul>
+                </li>
+                <li class="tab"><a href="/mysterycode">이상한 소포</a></li>
+                <li class="tab"><a href="/about">소개 및 문의</a></li>
+            </ul>
+        </nav>
+        <div id="background">
+            <main>
+                <div id="mysterycode-content">
+                    <h3 class="mysterycode-title">이상한소포 코드</h3>
+                    <div class="mysterycode-list" id="mysterycode-list">
+                        <!-- mysterycode.js가 .mysterycode-card를 여기 채웁니다 -->
+                    </div>
+                    <div class="pagination" id="mysterycode-pagination"></div>
+                </div>
+            </main>
+            <footer id="site-footer">
+                © 2026 PTD 한국어 팬 페이지 | Pokémon은 Nintendo, Creatures Inc., GAME FREAK inc.의 자산입니다 | PTD 원작자: Sam
+            </footer>
+        </div>
+    </div>
+
+    <!-- 카드 템플릿 (JS에서 clone하여 사용) -->
+    <template id="mysterycode-card-template">
+        <div class="mysterycode-card">
+            <div class="card-info-row">
+                <div class="cell cell-code"><div class="code-value"></div></div>
+                <div class="cell cell-sprite"><img class="sprite" src="" alt=""></div>
+                <div class="cell cell-name"><div class="name"></div></div>
+                <div class="cell cell-level"><div class="level-row">Lv.<span class="level-value"></span></div></div>
+            </div>
+            <div class="card-divider"></div>
+            <div class="move-table"></div>
+            <div class="card-divider"></div>
+            <div class="uses-row">사용가능 : <span class="uses-value"></span></div>
+        </div>
+    </template>
+
+    <script src="./js/auth.js"></script>
+    <script src="./js/mysterycode.js"></script>
+</body>
+</html>

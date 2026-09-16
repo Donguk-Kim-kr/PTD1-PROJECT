@@ -394,6 +394,16 @@ async function apiGetPokedexList() {
     return data.pokedex;
 }
 
+// 현재 활성화된 이상한소포 코드 전체를 가져옵니다. 로그인과 무관한 공개 데이터입니다.
+// mysterycode.html에서 사용합니다.
+async function apiGetMysteryCodeList() {
+    const data = await apiFetch(`${API_BASE}/api/web/mysterycode_list`, { method: "POST" });
+    if (!data.success) {
+        return [];
+    }
+    return data.codes;
+}
+
 // 다른 사람의 상태='대기' 등록 전체를 가져옵니다(본인 등록은 서버에서 이미 제외됨).
 async function apiGetMarketList() {
     const body = new URLSearchParams({ Token: getToken() });
