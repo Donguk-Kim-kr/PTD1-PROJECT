@@ -350,6 +350,11 @@ def build_login_response(email: str):
             (account["번호"], slot)
         ).fetchone()
 
+        dex = conn.execute(
+            "SELECT dex1, dex1shiny, dex1shadow FROM 수집 WHERE 계정_번호 = %s AND 프로필_슬롯 = %s",
+            (account["번호"], slot)
+        ).fetchone()
+
         if profile is None:
             response += (
                 f"&Advanced{slot}=0&Advanced{slot}_a=0&p{slot}_numPoke=0"
@@ -358,6 +363,7 @@ def build_login_response(email: str):
                 f"&Challenge{slot}=0&Money{slot}=50&NPCTrade{slot}=0"
                 f"&p{slot}_numItem=0&p{slot}_hs=0&avatar{slot}=none"
                 f"&Gender{slot}=0&p{slot}_ownedAvatars="
+                f"&dex1{slot}={DEX_DEFAULT}&dex1Shiny{slot}={DEX_DEFAULT}&dex1Shadow{slot}={DEX_DEFAULT}"
             )
             continue
 
@@ -445,6 +451,20 @@ def build_login_response(email: str):
 
         response += f"&p{slot}_hs={shiny_count}&avatar{slot}={swf_avatar_value}"
 
+        # 도감(수집)은 슬롯별로 분리 저장되어 있으므로, 다른 슬롯 데이터와 동일하게
+        # 슬롯 번호를 붙여(dex1{slot}) 로그인 응답에 함께 실어 보냅니다. SWF는 프로필을
+        # 선택하는 시점에 this.var_172(선택한 슬롯 번호)를 이미 알고 있으므로, 그
+        # 이름으로 자기 슬롯의 값만 골라 읽습니다(class_878.as 수정 필요). 아직 한
+        # 번도 저장된 적 없는 프로필(dex 행 없음)은 151자리 미확인(0)으로 응답합니다.
+        dex1_value = dex["dex1"] if dex is not None and dex["dex1"] else DEX_DEFAULT
+        dex1shiny_value = dex["dex1shiny"] if dex is not None and dex["dex1shiny"] else DEX_DEFAULT
+        dex1shadow_value = dex["dex1shadow"] if dex is not None and dex["dex1shadow"] else DEX_DEFAULT
+        response += (
+            f"&dex1{slot}={dex1_value}"
+            f"&dex1Shiny{slot}={dex1shiny_value}"
+            f"&dex1Shadow{slot}={dex1shadow_value}"
+        )
+
         for idx, poke in enumerate(pokemons, start=1):
             response += (
                 f"&p{slot}_poke_{idx}_nickname={quote(poke['별명'])}"
@@ -463,8 +483,6 @@ def build_login_response(email: str):
                 f"&p{slot}_poke_{idx}_m4={poke['기술4']}"
                 f"&p{slot}_poke_{idx}_mSel={poke['사용기술']}"
             )
-
-    response += "&dex1=0&dex1shiny=0&dex1shadow=0"
 
     conn.close()
     return response
@@ -995,8 +1013,8 @@ def handle_get_dex1(conn, account_id: int, profile: int):
     return (
         "Result=Success&Reason=GetDex"
         f"&dex1={row['dex1'] or ''}"
-        f"&dex1shiny={row['dex1shiny'] or ''}"
-        f"&dex1shadow={row['dex1shadow'] or ''}"
+        f"&dex1Shiny={row['dex1shiny'] or ''}"
+        f"&dex1Shadow={row['dex1shadow'] or ''}"
     )
 
 
