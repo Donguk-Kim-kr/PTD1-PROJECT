@@ -14,6 +14,13 @@ from urllib.parse import quote
 
 router = APIRouter()
 
+# 도감(수집: dex1/dex1Shiny/dex1Shadow)의 초기값. SWF가 151마리 분량의 문자열을
+# 통째로 주고받는데(각 자리는 그 도감번호 포켓몬을 만났는지), 빈 문자열('')로
+# 시작하면 SWF가 var_454.split("")로 빈 배열을 만든 뒤 잡은 포켓몬 자리에만
+# 인덱스로 값을 넣어서 그 사이 자리들이 undefined로 채워지는 문제가 있었다
+# (9/17 확인). "전부 미확인" 상태를 151자리 '0'으로 명시해 이를 막는다.
+DEX_DEFAULT = "0" * 151
+
 REWARD_NAME_TO_NUMBER = {
     "One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5,
     "Six": 6, "Seven": 7, "Eight": 8, "Nine": 9, "Ten": 10,
@@ -117,13 +124,13 @@ def init_swf_tables(conn):
             PRIMARY KEY (계정_번호, 프로필_슬롯)
         )
     """)
-    conn.execute("""
+    conn.execute(f"""
         CREATE TABLE IF NOT EXISTS 수집 (
             계정_번호 INTEGER NOT NULL,
             프로필_슬롯 INTEGER NOT NULL,
-            dex1 TEXT DEFAULT '',
-            dex1Shiny TEXT DEFAULT '',
-            dex1Shadow TEXT DEFAULT '',
+            dex1 TEXT DEFAULT '{DEX_DEFAULT}',
+            dex1Shiny TEXT DEFAULT '{DEX_DEFAULT}',
+            dex1Shadow TEXT DEFAULT '{DEX_DEFAULT}',
             PRIMARY KEY (계정_번호, 프로필_슬롯)
         )
     """)
@@ -272,8 +279,8 @@ def handle_create_account(email: str, password: str):
             (account_id, slot)
         )
         conn.execute(
-            "INSERT INTO 수집 (계정_번호, 프로필_슬롯) VALUES (%s, %s)",
-            (account_id, slot)
+            "INSERT INTO 수집 (계정_번호, 프로필_슬롯, dex1, dex1Shiny, dex1Shadow) VALUES (%s, %s, %s, %s, %s)",
+            (account_id, slot, DEX_DEFAULT, DEX_DEFAULT, DEX_DEFAULT)
         )
         conn.execute(
             "INSERT INTO 소지품 (계정_번호, 프로필_슬롯) VALUES (%s, %s)",

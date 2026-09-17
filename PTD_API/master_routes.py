@@ -185,7 +185,7 @@ def use_code(conn, account_id: int, code: str, profile: int = 1) -> str:
         INSERT INTO 코드사용기록 (계정_번호, 프로필_슬롯, 이상한소포_코드, 도감_번호, 사용)
         VALUES (%s, %s, %s, %s, 1)
         ON CONFLICT(계정_번호, 프로필_슬롯, 이상한소포_코드) DO UPDATE SET
-            사용 = 사용 + 1
+            사용 = 코드사용기록.사용 + 1
     """, (account_id, profile, code, code_row["도감_번호"]))
 
     # 포켓몬 지급. 레벨/기술은 이상한소포 테이블에 등록 시점에 저장된 값을 그대로 사용
