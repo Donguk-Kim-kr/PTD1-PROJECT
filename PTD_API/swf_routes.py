@@ -957,14 +957,22 @@ def handle_check_account(conn, account_id: int, profile: int):
         "SELECT 번호, 조건1, 조건2, 조건3, 조건4 FROM 업적 WHERE 계정_번호 = %s AND 프로필_슬롯 = %s",
         (account_id, profile)
     ).fetchall()
-    completed = {
-        row["번호"] for row in rows
-        if row["조건1"] == 1 and row["조건2"] == 1 and row["조건3"] == 1 and row["조건4"] == 1
-    }
+    rows_by_num = {row["번호"]: row for row in rows}
 
+    # SWF(class_894.as)는 Ach1만 4글자 문자열로 받아 한 글자씩 순회하며
+    # check_1~4를 각각 그린다(조건1~4 자리). 나머지 업적(Ach2~14)은
+    # "완료면 1, 아니면 0" 단일 값으로만 받는다
     response = "Result=Success&Reason=GetAchive"
     for n in range(1, 15):
-        value = 1 if n in completed else 0
+        row = rows_by_num.get(n)
+        if n == 1:
+            if row is None:
+                value = "0000"
+            else:
+                value = f"{row['조건1']}{row['조건2']}{row['조건3']}{row['조건4']}"
+        else:
+            value = 1 if (row is not None and row["조건1"] == 1 and row["조건2"] == 1
+                          and row["조건3"] == 1 and row["조건4"] == 1) else 0
         response += f"&Ach{n}={value}"
     return response
 
