@@ -14,7 +14,7 @@ from urllib.parse import quote
 
 router = APIRouter()
 
-# 도감(수집: dex1/dex1Shiny/dex1Shadow)의 초기값. SWF가 151마리 분량의 문자열을
+# 도감(수집: dex1/dex1shiny/dex1shadow)의 초기값. SWF가 151마리 분량의 문자열을
 # 통째로 주고받는데(각 자리는 그 도감번호 포켓몬을 만났는지), 빈 문자열('')로
 # 시작하면 SWF가 var_454.split("")로 빈 배열을 만든 뒤 잡은 포켓몬 자리에만
 # 인덱스로 값을 넣어서 그 사이 자리들이 undefined로 채워지는 문제가 있었다
@@ -129,8 +129,8 @@ def init_swf_tables(conn):
             계정_번호 INTEGER NOT NULL,
             프로필_슬롯 INTEGER NOT NULL,
             dex1 TEXT DEFAULT '{DEX_DEFAULT}',
-            dex1Shiny TEXT DEFAULT '{DEX_DEFAULT}',
-            dex1Shadow TEXT DEFAULT '{DEX_DEFAULT}',
+            dex1shiny TEXT DEFAULT '{DEX_DEFAULT}',
+            dex1shadow TEXT DEFAULT '{DEX_DEFAULT}',
             PRIMARY KEY (계정_번호, 프로필_슬롯)
         )
     """)
@@ -279,7 +279,7 @@ def handle_create_account(email: str, password: str):
             (account_id, slot)
         )
         conn.execute(
-            "INSERT INTO 수집 (계정_번호, 프로필_슬롯, dex1, dex1Shiny, dex1Shadow) VALUES (%s, %s, %s, %s, %s)",
+            "INSERT INTO 수집 (계정_번호, 프로필_슬롯, dex1, dex1shiny, dex1shadow) VALUES (%s, %s, %s, %s, %s)",
             (account_id, slot, DEX_DEFAULT, DEX_DEFAULT, DEX_DEFAULT)
         )
         conn.execute(
@@ -464,7 +464,7 @@ def build_login_response(email: str):
                 f"&p{slot}_poke_{idx}_mSel={poke['사용기술']}"
             )
 
-    response += "&dex1=0&dex1Shiny=0&dex1Shadow=0"
+    response += "&dex1=0&dex1shiny=0&dex1shadow=0"
 
     conn.close()
     return response
@@ -679,18 +679,18 @@ def handle_save_account(token: str, email: str, password: str, save_string: str)
             (account["번호"], which_profile)
         )
 
-    # 수집(dex1/dex1Shiny/dex1Shadow) 저장. SWF가 매번 151자리 문자열 전체를 통째로 보내옵니다.
+    # 수집(dex1/dex1shiny/dex1shadow) 저장. SWF가 매번 151자리 문자열 전체를 통째로 보내옵니다.
     dex1 = data.get("dex1")
     dex1_shiny = data.get("dex1Shiny")
     dex1_shadow = data.get("dex1Shadow")
     if dex1 is not None or dex1_shiny is not None or dex1_shadow is not None:
         conn.execute("""
-            INSERT INTO 수집 (계정_번호, 프로필_슬롯, dex1, dex1Shiny, dex1Shadow)
+            INSERT INTO 수집 (계정_번호, 프로필_슬롯, dex1, dex1shiny, dex1shadow)
             VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT(계정_번호, 프로필_슬롯) DO UPDATE SET
                 dex1=excluded.dex1,
-                dex1Shiny=excluded.dex1Shiny,
-                dex1Shadow=excluded.dex1Shadow
+                dex1shiny=excluded.dex1shiny,
+                dex1shadow=excluded.dex1shadow
         """, (
             account["번호"], which_profile,
             dex1 or "", dex1_shiny or "", dex1_shadow or "",
@@ -985,7 +985,7 @@ def handle_get_dex1(conn, account_id: int, profile: int):
     동일한 패턴입니다.
     """
     row = conn.execute(
-        "SELECT dex1, dex1Shiny, dex1Shadow FROM 수집 WHERE 계정_번호 = %s AND 프로필_슬롯 = %s",
+        "SELECT dex1, dex1shiny, dex1shadow FROM 수집 WHERE 계정_번호 = %s AND 프로필_슬롯 = %s",
         (account_id, profile)
     ).fetchone()
 
@@ -995,8 +995,8 @@ def handle_get_dex1(conn, account_id: int, profile: int):
     return (
         "Result=Success&Reason=GetDex"
         f"&dex1={row['dex1'] or ''}"
-        f"&dex1Shiny={row['dex1Shiny'] or ''}"
-        f"&dex1Shadow={row['dex1Shadow'] or ''}"
+        f"&dex1shiny={row['dex1shiny'] or ''}"
+        f"&dex1shadow={row['dex1shadow'] or ''}"
     )
 
 
