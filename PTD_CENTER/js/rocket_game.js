@@ -1055,6 +1055,25 @@ function renderIceGame(container) {
     targetEl.innerHTML = `<img src="./image/ice/target.png" alt="목표">`;
     board.appendChild(targetEl);
 
+    // 캐릭터가 위아래로 겹칠 때, 더 아래쪽 칸(row가 큰 쪽)에 있는
+    // 캐릭터가 화면 앞쪽(위)에 보이도록 z-index를 row 기반으로 매번
+    // 갱신한다. base 2는 기존 .ice-robot 기본 z-index(2)와의 정합을
+    // 위한 오프셋이며, row가 커질수록 값도 커지므로 아래 칸일수록
+    // 위에 그려진다.
+    //
+    // 이동 시작 시점에는 robotPositions[name]을 목적지로 미리
+    // 갱신한 뒤 이 함수를 호출하므로(moveRobot 참고), 이동
+    // 애니메이션이 진행되는 동안(아직 화면상 도착 전이라도) 이미
+    // 목적지 row 기준으로 z-index가 적용된다. 이 게임은 로봇끼리
+    // 서로 뚫고 지나가지 못하므로(iceSlideFast가 앞 칸에서 멈춤),
+    // 캐릭터 이미지가 칸보다 커서 열이 다른 두 캐릭터가 같은 row를
+    // 스쳐 지나가는 경우에도 "목적지가 더 아래면 스쳐가는 내내 위,
+    // 목적지가 더 위면 스쳐가는 내내 아래"로 일관되게 처리된다.
+    function updateIceRobotZIndex(name) {
+        const [row] = robotPositions[name];
+        robotEls[name].style.zIndex = String(2 + row);
+    }
+
     ICE_ROBOT_NAMES.forEach((name) => {
         const [row, col] = robotPositions[name];
         const robotEl = document.createElement("div");
@@ -1074,6 +1093,7 @@ function renderIceGame(container) {
         });
         board.appendChild(robotEl);
         robotEls[name] = robotEl;
+        updateIceRobotZIndex(name);
     });
 
     // ── 슬라이딩 계산 (다른 로봇 포함) ─────────────────────────
@@ -1190,7 +1210,11 @@ function renderIceGame(container) {
         el.style.transitionDuration = `${duration}s`;
         el.style.left = `${toCol * 48}px`;
         el.style.top = `${toRow * 48}px`;
+        // z-index는 목적지 row 기준으로 이동 시작과 동시에 정한다.
+        // 즉 더 아래로 이동하는 캐릭터는 스쳐 지나가는 동안 계속
+        // 위에, 더 위로 이동하는 캐릭터는 계속 아래에 보인다.
         robotPositions[name] = [toRow, toCol];
+        updateIceRobotZIndex(name);
 
         const isClear = name === "red" && toRow === targetRow && toCol === targetCol;
 
