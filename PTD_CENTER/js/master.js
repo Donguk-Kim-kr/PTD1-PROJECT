@@ -1586,19 +1586,25 @@ function renderMysteryContent() {
         .map((c) => {
             const selected = c.id === mysterySelectedId ? " selected" : "";
             const maxUsesText = c.max_uses === 0 ? "무제한" : String(c.max_uses);
+            // 포켓몬 없이 지급액만 주는 코드는 포켓몬/모습/레벨/기술 관련 값이
+            // 전부 null이므로, 그 칸들은 "-"로 표시합니다.
+            const isPokemonCode = c.dex !== null && c.dex !== undefined;
+            const moneyText = c.money > 0 ? `₩ ${c.money.toLocaleString()}` : "-";
             return `
                 <tr class="mystery-row${selected}" data-id="${c.id}">
                     <td>${c.id}</td>
                     <td>${c.code}</td>
-                    <td>${c.pokemon_name}</td>
-                    <td>${FORM_LABEL[c.form] ?? c.form}</td>
-                    <td>${c.level}</td>
-                    <td>${c.move_names[0]}</td>
-                    <td>${c.move_names[1]}</td>
-                    <td>${c.move_names[2]}</td>
-                    <td>${c.move_names[3]}</td>
+                    <td>${isPokemonCode ? c.pokemon_name : "-"}</td>
+                    <td>${isPokemonCode ? (FORM_LABEL[c.form] ?? c.form) : "-"}</td>
+                    <td>${isPokemonCode ? c.level : "-"}</td>
+                    <td>${isPokemonCode ? c.move_names[0] : "-"}</td>
+                    <td>${isPokemonCode ? c.move_names[1] : "-"}</td>
+                    <td>${isPokemonCode ? c.move_names[2] : "-"}</td>
+                    <td>${isPokemonCode ? c.move_names[3] : "-"}</td>
+                    <td>${moneyText}</td>
                     <td>${maxUsesText}</td>
                     <td>${c.active ? "활성" : "비활성"}</td>
+                    <td>${c.public ? "공개" : "비공개"}</td>
                     <td>${c.description || "-"}</td>
                 </tr>
             `;
@@ -1612,10 +1618,10 @@ function renderMysteryContent() {
                     <tr>
                         <th>번호</th><th>코드</th><th>포켓몬</th><th>모습</th><th>레벨</th>
                         <th>기술1</th><th>기술2</th><th>기술3</th><th>기술4</th>
-                        <th>사용가능</th><th>활성여부</th><th>설명</th>
+                        <th>지급액</th><th>사용가능</th><th>활성여부</th><th>공개여부</th><th>설명</th>
                     </tr>
                 </thead>
-                <tbody>${rows || `<tr><td colspan="12" class="mystery-empty">등록된 코드가 없습니다.</td></tr>`}</tbody>
+                <tbody>${rows || `<tr><td colspan="14" class="mystery-empty">등록된 코드가 없습니다.</td></tr>`}</tbody>
             </table>
         </div>
         <div class="mystery-actions">
