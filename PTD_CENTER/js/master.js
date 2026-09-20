@@ -1586,7 +1586,7 @@ function renderMysteryContent() {
         .map((c) => {
             const selected = c.id === mysterySelectedId ? " selected" : "";
             const maxUsesText = c.max_uses === 0 ? "무제한" : String(c.max_uses);
-            // 포켓몬 없이 지급액만 주는 코드는 포켓몬/모습/레벨/기술 관련 값이
+            // 포켓몬 없이 지급액만 주는 코드는 포켓몬/모습/레벨 관련 값이
             // 전부 null이므로, 그 칸들은 "-"로 표시합니다.
             const isPokemonCode = c.dex !== null && c.dex !== undefined;
             const moneyText = c.money > 0 ? `₩ ${c.money.toLocaleString()}` : "-";
@@ -1597,10 +1597,6 @@ function renderMysteryContent() {
                     <td>${isPokemonCode ? c.pokemon_name : "-"}</td>
                     <td>${isPokemonCode ? (FORM_LABEL[c.form] ?? c.form) : "-"}</td>
                     <td>${isPokemonCode ? c.level : "-"}</td>
-                    <td>${isPokemonCode ? c.move_names[0] : "-"}</td>
-                    <td>${isPokemonCode ? c.move_names[1] : "-"}</td>
-                    <td>${isPokemonCode ? c.move_names[2] : "-"}</td>
-                    <td>${isPokemonCode ? c.move_names[3] : "-"}</td>
                     <td>${moneyText}</td>
                     <td>${maxUsesText}</td>
                     <td>${c.active ? "활성" : "비활성"}</td>
@@ -1617,11 +1613,10 @@ function renderMysteryContent() {
                 <thead>
                     <tr>
                         <th>번호</th><th>코드</th><th>포켓몬</th><th>모습</th><th>레벨</th>
-                        <th>기술1</th><th>기술2</th><th>기술3</th><th>기술4</th>
                         <th>지급액</th><th>사용가능</th><th>활성여부</th><th>공개여부</th><th>설명</th>
                     </tr>
                 </thead>
-                <tbody>${rows || `<tr><td colspan="14" class="mystery-empty">등록된 코드가 없습니다.</td></tr>`}</tbody>
+                <tbody>${rows || `<tr><td colspan="10" class="mystery-empty">등록된 코드가 없습니다.</td></tr>`}</tbody>
             </table>
         </div>
         <div class="mystery-actions">
@@ -1909,12 +1904,16 @@ function openMysteryAddModal() {
                     <input type="number" id="mystery-add-money" value="0" min="0">
                 </div>
                 <div class="mystery-form-row">
-                    <label for="mystery-add-public">코드 목록에 공개</label>
-                    <input type="checkbox" id="mystery-add-public" checked>
-                </div>
-                <div class="mystery-form-row">
                     <label for="mystery-add-max-uses">사용가능 (0=무제한)</label>
                     <input type="number" id="mystery-add-max-uses" value="1" min="0">
+                </div>
+                <div class="mystery-form-row">
+                    <label>활성여부</label>
+                    <button type="button" class="mystery-toggle-button on" id="mystery-add-active-toggle" data-value="1">활성</button>
+                </div>
+                <div class="mystery-form-row">
+                    <label>공개여부</label>
+                    <button type="button" class="mystery-toggle-button on" id="mystery-add-public-toggle" data-value="1">공개</button>
                 </div>
                 <div class="mystery-form-row">
                     <label for="mystery-add-description">설명</label>
@@ -1935,8 +1934,21 @@ function openMysteryAddModal() {
             document.getElementById("mystery-add-pokemon-label").textContent = `${picked.name} (No.${picked.dex})`;
         });
     });
+    setupMysteryToggleButton(document.getElementById("mystery-add-active-toggle"), "활성", "비활성");
+    setupMysteryToggleButton(document.getElementById("mystery-add-public-toggle"), "공개", "비공개");
     document.getElementById("mystery-add-cancel").addEventListener("click", closeMysteryAddModal);
     document.getElementById("mystery-add-submit").addEventListener("click", submitMysteryAdd);
+}
+
+// 활성여부/공개여부 토글 버튼 하나에 클릭 시 on/off를 전환하는 동작을
+// 붙인다. onLabel/offLabel은 버튼에 표시할 텍스트(예: "활성"/"비활성").
+function setupMysteryToggleButton(button, onLabel, offLabel) {
+    button.addEventListener("click", () => {
+        const isOn = button.dataset.value === "1";
+        button.dataset.value = isOn ? "0" : "1";
+        button.textContent = isOn ? offLabel : onLabel;
+        button.classList.toggle("on", !isOn);
+    });
 }
 
 function closeMysteryAddModal() {
@@ -1956,7 +1968,8 @@ async function submitMysteryAdd() {
     const formName = document.getElementById("mystery-add-form").value;
     const level = Number(document.getElementById("mystery-add-level").value);
     const money = Number(document.getElementById("mystery-add-money").value);
-    const isPublic = document.getElementById("mystery-add-public").checked;
+    const isActive = document.getElementById("mystery-add-active-toggle").dataset.value === "1";
+    const isPublic = document.getElementById("mystery-add-public-toggle").dataset.value === "1";
     const maxUses = Number(document.getElementById("mystery-add-max-uses").value);
     const description = document.getElementById("mystery-add-description").value.trim();
 
@@ -1980,6 +1993,7 @@ async function submitMysteryAdd() {
         description,
         level: String(level),
         money: String(money),
+        is_active: isActive ? "1" : "0",
         is_public: isPublic ? "1" : "0",
     });
     const res = await fetch(`${API_BASE}/master/mysterycode`, { method: "POST", body });
@@ -2041,19 +2055,16 @@ function openMysteryEditModal(target) {
                     <input type="number" id="mystery-edit-money" value="${target.money}" min="0">
                 </div>
                 <div class="mystery-form-row">
-                    <label for="mystery-edit-public">코드 목록에 공개</label>
-                    <input type="checkbox" id="mystery-edit-public"${target.public ? " checked" : ""}>
-                </div>
-                <div class="mystery-form-row">
                     <label for="mystery-edit-max-uses">사용가능 (0=무제한)</label>
                     <input type="number" id="mystery-edit-max-uses" value="${target.max_uses}" min="0">
                 </div>
                 <div class="mystery-form-row">
-                    <label for="mystery-edit-active">활성여부</label>
-                    <select id="mystery-edit-active">
-                        <option value="1"${target.active ? " selected" : ""}>활성</option>
-                        <option value="0"${!target.active ? " selected" : ""}>비활성</option>
-                    </select>
+                    <label>활성여부</label>
+                    <button type="button" class="mystery-toggle-button${target.active ? " on" : ""}" id="mystery-edit-active-toggle" data-value="${target.active ? "1" : "0"}">${target.active ? "활성" : "비활성"}</button>
+                </div>
+                <div class="mystery-form-row">
+                    <label>공개여부</label>
+                    <button type="button" class="mystery-toggle-button${target.public ? " on" : ""}" id="mystery-edit-public-toggle" data-value="${target.public ? "1" : "0"}">${target.public ? "공개" : "비공개"}</button>
                 </div>
                 <div class="mystery-form-row">
                     <label for="mystery-edit-description">설명</label>
@@ -2069,6 +2080,8 @@ function openMysteryEditModal(target) {
     `);
 
     document.getElementById("mystery-edit-cancel").addEventListener("click", closeMysteryEditModal);
+    setupMysteryToggleButton(document.getElementById("mystery-edit-active-toggle"), "활성", "비활성");
+    setupMysteryToggleButton(document.getElementById("mystery-edit-public-toggle"), "공개", "비공개");
     document.getElementById("mystery-edit-submit").addEventListener("click", () => submitMysteryEdit(target.id));
 }
 
@@ -2092,9 +2105,9 @@ async function submitMysteryEdit(id) {
     const level = levelEl ? Number(levelEl.value) : 0;
     const movesRaw = movesEl ? movesEl.value.trim() : "";
     const money = Number(document.getElementById("mystery-edit-money").value);
-    const isPublic = document.getElementById("mystery-edit-public").checked;
+    const isPublic = document.getElementById("mystery-edit-public-toggle").dataset.value === "1";
     const maxUses = Number(document.getElementById("mystery-edit-max-uses").value);
-    const active = document.getElementById("mystery-edit-active").value;
+    const active = document.getElementById("mystery-edit-active-toggle").dataset.value;
     const description = document.getElementById("mystery-edit-description").value.trim();
 
     const body = new URLSearchParams({

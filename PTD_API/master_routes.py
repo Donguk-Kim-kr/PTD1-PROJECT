@@ -98,6 +98,7 @@ def register_code(
     moves: list = None,
     money: int = 0,
     is_public: bool = True,
+    is_active: bool = True,
 ):
     """
     코드를 새로 등록합니다.
@@ -112,6 +113,7 @@ def register_code(
     money: 이 코드를 사용했을 때 함께 지급할 소지금(원). 0이면 지급 없음.
     is_public: /mysterycode 목록 페이지에 노출할지 여부. 활성여부와는
         독립적인 값이며, 활성 상태를 전제로 한 하위 조건입니다.
+    is_active: 등록 즉시 코드를 사용 가능하게 할지 여부. 기본 True(활성).
     """
     pokemon_num = None
     form_value = 0
@@ -136,8 +138,8 @@ def register_code(
 
     conn.execute("""
         INSERT INTO 이상한소포
-            (코드, 도감_번호, 모습, 레벨, 기술1, 기술2, 기술3, 기술4, 지급액, 사용가능, 공개여부, 설명)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            (코드, 도감_번호, 모습, 레벨, 기술1, 기술2, 기술3, 기술4, 지급액, 사용가능, 활성여부, 공개여부, 설명)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT(코드) DO UPDATE SET
             도감_번호=excluded.도감_번호,
             모습=excluded.모습,
@@ -148,9 +150,10 @@ def register_code(
             기술4=excluded.기술4,
             지급액=excluded.지급액,
             사용가능=excluded.사용가능,
+            활성여부=excluded.활성여부,
             공개여부=excluded.공개여부,
             설명=excluded.설명
-    """, (code, pokemon_num, form_value, level, *move_slots, money, max_uses, int(is_public), description))
+    """, (code, pokemon_num, form_value, level, *move_slots, money, max_uses, int(is_active), int(is_public), description))
     conn.commit()
 
     return {
@@ -163,6 +166,7 @@ def register_code(
         "moves": move_slots if pokemon_name else None,
         "money": money,
         "max_uses": "무제한" if max_uses == 0 else max_uses,
+        "is_active": is_active,
         "is_public": is_public,
     }
 
@@ -285,6 +289,7 @@ def register_mystery_code(
     moves: str = Form(None),
     money: int = Form(0),
     is_public: str = Form("1"),
+    is_active: str = Form("1"),
 ):
     """
     moves: 쉼표로 구분된 기술 번호 문자열 (예: "5,22,0,0"). 생략하면
@@ -321,7 +326,8 @@ def register_mystery_code(
 
     result = register_code(
         conn, code, pokemon_name, form_name, max_uses, description,
-        level=level, moves=move_list, money=money, is_public=(is_public == "1"),
+        level=level, moves=move_list, money=money,
+        is_public=(is_public == "1"), is_active=(is_active == "1"),
     )
     conn.close()
     return result
