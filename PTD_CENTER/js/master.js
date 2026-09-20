@@ -1549,12 +1549,14 @@ function renderMysteryUsageContent() {
     const rows = mysteryUsageList
         .map((u) => {
             const profileSlotText = u.profile_slot ?? "-";
+            const moneyText = u.money > 0 ? `₩ ${u.money.toLocaleString()}` : "-";
             return `
                 <tr class="mystery-usage-row">
                     <td>${escapeHtml(u.email)}</td>
                     <td>${profileSlotText}</td>
                     <td>${escapeHtml(u.code)}</td>
                     <td>${escapeHtml(u.pokemon_name)}</td>
+                    <td>${moneyText}</td>
                     <td>${u.use_count}</td>
                 </tr>
             `;
@@ -1566,10 +1568,10 @@ function renderMysteryUsageContent() {
             <table class="mystery-table mystery-usage-table">
                 <thead>
                     <tr>
-                        <th>계정</th><th>프로필_슬롯</th><th>코드</th><th>포켓몬</th><th>사용</th>
+                        <th>계정</th><th>프로필_슬롯</th><th>코드</th><th>포켓몬</th><th>지급액</th><th>사용</th>
                     </tr>
                 </thead>
-                <tbody>${rows || `<tr><td colspan="5" class="mystery-empty">사용 기록이 없습니다.</td></tr>`}</tbody>
+                <tbody>${rows || `<tr><td colspan="6" class="mystery-empty">사용 기록이 없습니다.</td></tr>`}</tbody>
             </table>
         </div>
     `;
@@ -1858,7 +1860,10 @@ function onMysteryPickConfirm() {
 }
 
 // ── 추가 모달 ────────────────────────────────────────────────
-// 필드: 코드, 포켓몬이름(선택 모달로 지정), 모습, 레벨, 사용가능, 설명.
+// 필드: 코드, 포켓몬이름(선택 모달로 지정, 선택사항), 모습, 레벨, 지급액,
+// 공개여부, 사용가능, 설명. 포켓몬을 선택하지 않으면 지급액이 반드시 있어야
+// 하고(둘 다 없는 코드는 등록 거부), 포켓몬을 선택하면 지급액은 보너스로
+// 선택 입력할 수 있습니다.
 // 기술1~4는 등록 시점엔 서버(register_code)가 POKEMON_INITIAL_MOVES로 자동
 // 계산해 채우므로(마스터라우트의 registerMysteryCode 참고) 이 모달에서는
 // 입력받지 않습니다 — 필요하면 등록 후 "수정"에서 조정합니다.
@@ -1875,7 +1880,7 @@ function openMysteryAddModal() {
                     <input type="text" id="mystery-add-code" placeholder="예: HAPPY2026">
                 </div>
                 <div class="mystery-form-row">
-                    <label>포켓몬</label>
+                    <label>포켓몬 (선택)</label>
                     <div class="mystery-form-pokemon-picked">
                         <span id="mystery-add-pokemon-label">선택 안 됨</span>
                         <button type="button" id="mystery-add-pokemon-pick-btn">포켓몬 선택</button>
@@ -1892,6 +1897,14 @@ function openMysteryAddModal() {
                 <div class="mystery-form-row">
                     <label for="mystery-add-level">레벨</label>
                     <input type="number" id="mystery-add-level" value="1" min="1" max="100">
+                </div>
+                <div class="mystery-form-row">
+                    <label for="mystery-add-money">지급액 (원, 0=없음)</label>
+                    <input type="number" id="mystery-add-money" value="0" min="0">
+                </div>
+                <div class="mystery-form-row">
+                    <label for="mystery-add-public">코드 목록에 공개</label>
+                    <input type="checkbox" id="mystery-add-public" checked>
                 </div>
                 <div class="mystery-form-row">
                     <label for="mystery-add-max-uses">사용가능 (0=무제한)</label>
@@ -1936,6 +1949,8 @@ async function submitMysteryAdd() {
     const code = document.getElementById("mystery-add-code").value.trim();
     const formName = document.getElementById("mystery-add-form").value;
     const level = Number(document.getElementById("mystery-add-level").value);
+    const money = Number(document.getElementById("mystery-add-money").value);
+    const isPublic = document.getElementById("mystery-add-public").checked;
     const maxUses = Number(document.getElementById("mystery-add-max-uses").value);
     const description = document.getElementById("mystery-add-description").value.trim();
 
@@ -1943,19 +1958,23 @@ async function submitMysteryAdd() {
         showMysteryAddError("코드를 입력해 주세요.");
         return;
     }
-    if (!mysteryAddPicked) {
-        showMysteryAddError("포켓몬을 선택해 주세요.");
+    // 포켓몬도 없고 지급액도 0인 코드는 아무것도 지급하지 않는 코드가
+    // 되어버리므로, 등록 단계에서 미리 막습니다.
+    if (!mysteryAddPicked && money <= 0) {
+        showMysteryAddError("포켓몬을 선택하거나 지급액을 입력해 주세요.");
         return;
     }
 
     const body = new URLSearchParams({
         Token: getToken(),
         code,
-        pokemon_name: mysteryAddPicked.name,
+        pokemon_name: mysteryAddPicked ? mysteryAddPicked.name : "",
         form_name: formName,
         max_uses: String(maxUses),
         description,
         level: String(level),
+        money: String(money),
+        is_public: isPublic ? "1" : "0",
     });
     const res = await fetch(`${API_BASE}/master/mysterycode`, { method: "POST", body });
     const data = await res.json();
@@ -1980,16 +1999,15 @@ async function submitMysteryAdd() {
 }
 
 // ── 수정 모달 ────────────────────────────────────────────────
-// 필드: 모습, 레벨, 기술1~4, 사용가능, 활성여부, 설명. 코드/포켓몬 종류는
-// 여기서 다루지 않음(master_routes.py의 mysterycode_update와 동일한 원칙 —
-// 종류를 바꾸고 싶으면 새 코드를 등록).
+// 필드: 모습, 레벨, 기술1~4, 지급액, 공개여부, 사용가능, 활성여부, 설명.
+// 코드/포켓몬 종류는 여기서 다루지 않음(master_routes.py의
+// mysterycode_update와 동일한 원칙 — 종류를 바꾸고 싶으면 새 코드를 등록).
+// 포켓몬 없이 돈만 지급하는 코드(target.dex가 null)는 모습/레벨/기술
+// 입력란을 아예 보여주지 않습니다 — 그 코드에는 의미가 없는 값이므로.
 function openMysteryEditModal(target) {
-    const movesText = target.moves.filter((m) => m).join(", ");
-    document.body.insertAdjacentHTML("beforeend", `
-        <div class="modal-overlay" id="mystery-edit-modal">
-            <div class="modal-card mystery-form-card">
-                <h2 class="mystery-form-title">이상한소포 코드 수정</h2>
-                <p class="mystery-form-fixed-info">코드 <b>${target.code}</b> · ${target.pokemon_name}</p>
+    const isPokemonCode = target.dex !== null && target.dex !== undefined;
+    const movesText = isPokemonCode ? target.moves.filter((m) => m).join(", ") : "";
+    const pokemonFieldsHtml = isPokemonCode ? `
                 <div class="mystery-form-row">
                     <label for="mystery-edit-form">모습</label>
                     <select id="mystery-edit-form">
@@ -2005,6 +2023,20 @@ function openMysteryEditModal(target) {
                 <div class="mystery-form-row">
                     <label for="mystery-edit-moves">기술 1~4 (쉼표로 구분, 번호)</label>
                     <input type="text" id="mystery-edit-moves" value="${movesText}" placeholder="예: 5, 22, 0, 0">
+                </div>` : "";
+    document.body.insertAdjacentHTML("beforeend", `
+        <div class="modal-overlay" id="mystery-edit-modal">
+            <div class="modal-card mystery-form-card">
+                <h2 class="mystery-form-title">이상한소포 코드 수정</h2>
+                <p class="mystery-form-fixed-info">코드 <b>${target.code}</b> · ${isPokemonCode ? target.pokemon_name : "지급액 전용 코드"}</p>
+                ${pokemonFieldsHtml}
+                <div class="mystery-form-row">
+                    <label for="mystery-edit-money">지급액 (원, 0=없음)</label>
+                    <input type="number" id="mystery-edit-money" value="${target.money}" min="0">
+                </div>
+                <div class="mystery-form-row">
+                    <label for="mystery-edit-public">코드 목록에 공개</label>
+                    <input type="checkbox" id="mystery-edit-public"${target.public ? " checked" : ""}>
                 </div>
                 <div class="mystery-form-row">
                     <label for="mystery-edit-max-uses">사용가능 (0=무제한)</label>
@@ -2046,9 +2078,15 @@ function showMysteryEditError(message) {
 }
 
 async function submitMysteryEdit(id) {
-    const formName = document.getElementById("mystery-edit-form").value;
-    const level = Number(document.getElementById("mystery-edit-level").value);
-    const movesRaw = document.getElementById("mystery-edit-moves").value.trim();
+    const formEl = document.getElementById("mystery-edit-form");
+    const levelEl = document.getElementById("mystery-edit-level");
+    const movesEl = document.getElementById("mystery-edit-moves");
+    // 돈 전용 코드는 모습/레벨/기술 입력란 자체가 없으므로, 있을 때만 값을 읽는다.
+    const formName = formEl ? formEl.value : "";
+    const level = levelEl ? Number(levelEl.value) : 0;
+    const movesRaw = movesEl ? movesEl.value.trim() : "";
+    const money = Number(document.getElementById("mystery-edit-money").value);
+    const isPublic = document.getElementById("mystery-edit-public").checked;
     const maxUses = Number(document.getElementById("mystery-edit-max-uses").value);
     const active = document.getElementById("mystery-edit-active").value;
     const description = document.getElementById("mystery-edit-description").value.trim();
@@ -2059,6 +2097,8 @@ async function submitMysteryEdit(id) {
         form_name: formName,
         level: String(level),
         moves: movesRaw,
+        money: String(money),
+        is_public: isPublic ? "1" : "0",
         max_uses: String(maxUses),
         active,
         description,

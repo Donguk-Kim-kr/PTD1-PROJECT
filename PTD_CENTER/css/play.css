@@ -49,8 +49,10 @@
 #play-controls {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 12px;
     margin-top: 14px;
+    position: relative;
 }
 
 #play-controls button {
@@ -80,6 +82,92 @@
 #play-controls button:disabled {
     opacity: 0.35;
     cursor: not-allowed;
+}
+
+#volume-control {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 14px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.vol-icon {
+    flex-shrink: 0;
+    color: #333333;
+}
+
+#volume-control #btn-volume-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    position: static;
+    border: none;
+    outline: none;
+    background: transparent;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #333333;
+}
+
+#volume-slider {
+    width: 90px;
+    height: 14px;
+    margin: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+
+/* 트랙: 브라우저 기본 트랙 대신 얇은 선으로 직접 그린다. */
+#volume-slider::-webkit-slider-runnable-track {
+    height: 4px;
+    background: #cccccc;
+    border-radius: 2px;
+}
+
+#volume-slider::-moz-range-track {
+    height: 4px;
+    background: #cccccc;
+    border-radius: 2px;
+}
+
+/* 손잡이: 세로 중앙 정렬을 위해 margin-top으로 트랙 위에 올린다.
+   (트랙 높이 4px, 손잡이 높이 14px → (4-14)/2 = -5px) */
+#volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #333333;
+    cursor: pointer;
+    margin-top: -5px;
+}
+
+#volume-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: none;
+    border-radius: 50%;
+    background: #333333;
+    cursor: pointer;
 }
 
 #play-help {

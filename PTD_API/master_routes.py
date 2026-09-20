@@ -45,18 +45,28 @@ def init_mystery_gift_tables(conn):
         CREATE TABLE IF NOT EXISTS 이상한소포 (
             번호 SERIAL PRIMARY KEY,
             코드 TEXT UNIQUE NOT NULL,
-            도감_번호 INTEGER NOT NULL,
+            도감_번호 INTEGER,
             모습 INTEGER NOT NULL DEFAULT 0,
             레벨 INTEGER NOT NULL DEFAULT 1,
             기술1 INTEGER,
             기술2 INTEGER,
             기술3 INTEGER,
             기술4 INTEGER,
+            지급액 INTEGER NOT NULL DEFAULT 0,
             사용가능 INTEGER NOT NULL DEFAULT 1,
             활성여부 INTEGER NOT NULL DEFAULT 1,
+            공개여부 INTEGER NOT NULL DEFAULT 1,
             설명 TEXT
         )
     """)
+    # 기존에 이미 만들어진 배포 DB에는 위 CREATE TABLE이 효과가 없으므로
+    # (IF NOT EXISTS), 새로 추가된 컬럼들을 ALTER TABLE로 보강합니다.
+    # 도감_번호는 컬럼 자체를 보탤 필요는 없지만(이미 존재), 제약을
+    # NOT NULL에서 완화해야 "포켓몬 없이 돈만 지급하는 코드"를 등록할 수
+    # 있습니다. 이미 완화되어 있으면 아무 효과 없이 조용히 넘어갑니다.
+    conn.execute("ALTER TABLE 이상한소포 ALTER COLUMN 도감_번호 DROP NOT NULL")
+    conn.execute("ALTER TABLE 이상한소포 ADD COLUMN IF NOT EXISTS 지급액 INTEGER NOT NULL DEFAULT 0")
+    conn.execute("ALTER TABLE 이상한소포 ADD COLUMN IF NOT EXISTS 공개여부 INTEGER NOT NULL DEFAULT 1")
     # 코드 하나당, "계정+프로필_슬롯" 조합이 몇 번 사용했는지 기록(누적
     # 횟수 방식). 도감_번호는 스냅샷(사용 당시 값) — 관리자가 나중에 코드
     # 내용을 바꿔도 과거 사용 이력은 그대로 남도록 조회 편의용으로 같이 저장.
@@ -66,10 +76,14 @@ def init_mystery_gift_tables(conn):
             프로필_슬롯 INTEGER NOT NULL,
             이상한소포_코드 TEXT NOT NULL,
             도감_번호 INTEGER,
+            지급액_누적 INTEGER NOT NULL DEFAULT 0,
             사용 INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY (계정_번호, 프로필_슬롯, 이상한소포_코드)
         )
     """)
+    # 기존에 이미 만들어진 배포 DB에는 위 CREATE TABLE이 효과가 없으므로
+    # (IF NOT EXISTS), 새로 추가된 컬럼을 ALTER TABLE로 보강합니다.
+    conn.execute("ALTER TABLE 코드사용기록 ADD COLUMN IF NOT EXISTS 지급액_누적 INTEGER NOT NULL DEFAULT 0")
     conn.commit()
 
 
@@ -82,32 +96,48 @@ def register_code(
     description: str = "",
     level: int = 1,
     moves: list = None,
+    money: int = 0,
+    is_public: bool = True,
 ):
     """
     코드를 새로 등록합니다.
-    pokemon_name: 한글 이름 (예: "피카츄")
-    form_name: "일반" / "샤이니" / "다크"
+    pokemon_name: 한글 이름 (예: "피카츄"). 빈 문자열이면 "포켓몬 없이 지급액만
+        주는 코드"로 등록됩니다 — 이 경우 money가 1 이상이어야 합니다.
+    form_name: "일반" / "샤이니" / "다크" (pokemon_name이 빈 문자열이면 무시됨)
     max_uses: 0이면 무제한, 1 이상이면 그 횟수만큼만 (계정당) 사용 가능
-    level: 지급 레벨, 기본 1
+    level: 지급 레벨, 기본 1 (pokemon_name이 빈 문자열이면 무시됨)
     moves: 기술 번호 리스트(최대 4개, 직접 지정 시 매핑 대신 이 값을 사용).
         None이면 POKEMON_INITIAL_MOVES에서 자동 조회(레벨1 기준 매핑이므로
         level != 1인 코드는 반드시 moves를 직접 지정할 것).
+    money: 이 코드를 사용했을 때 함께 지급할 소지금(원). 0이면 지급 없음.
+    is_public: /mysterycode 목록 페이지에 노출할지 여부. 활성여부와는
+        독립적인 값이며, 활성 상태를 전제로 한 하위 조건입니다.
     """
-    pokemon_num = POKEMON_NAME_TO_NUM.get(pokemon_name)
-    if pokemon_num is None:
-        return {"success": False, "error": f"알 수 없는 포켓몬 이름: {pokemon_name}"}
+    pokemon_num = None
+    form_value = 0
+    move_slots = [0, 0, 0, 0]
 
-    form_value = FORM_NAME_TO_VALUE.get(form_name)
-    if form_value is None:
-        return {"success": False, "error": f"알 수 없는 형태: {form_name} (일반/샤이니/다크 중 하나)"}
+    if pokemon_name:
+        pokemon_num = POKEMON_NAME_TO_NUM.get(pokemon_name)
+        if pokemon_num is None:
+            return {"success": False, "error": f"알 수 없는 포켓몬 이름: {pokemon_name}"}
 
-    if moves is None:
-        moves = POKEMON_INITIAL_MOVES.get(pokemon_num, [])
-    move_slots = (list(moves) + [0, 0, 0, 0])[:4]
+        form_value = FORM_NAME_TO_VALUE.get(form_name)
+        if form_value is None:
+            return {"success": False, "error": f"알 수 없는 형태: {form_name} (일반/샤이니/다크 중 하나)"}
+
+        if moves is None:
+            moves = POKEMON_INITIAL_MOVES.get(pokemon_num, [])
+        move_slots = (list(moves) + [0, 0, 0, 0])[:4]
+    elif money <= 0:
+        # 포켓몬도 없고 지급액도 없으면 아무것도 지급하지 않는 코드가 되어
+        # 버리므로, 등록 단계에서 막습니다.
+        return {"success": False, "error": "포켓몬을 지정하거나 지급액을 입력해야 합니다."}
 
     conn.execute("""
-        INSERT INTO 이상한소포 (코드, 도감_번호, 모습, 레벨, 기술1, 기술2, 기술3, 기술4, 사용가능, 설명)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO 이상한소포
+            (코드, 도감_번호, 모습, 레벨, 기술1, 기술2, 기술3, 기술4, 지급액, 사용가능, 공개여부, 설명)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT(코드) DO UPDATE SET
             도감_번호=excluded.도감_번호,
             모습=excluded.모습,
@@ -116,20 +146,24 @@ def register_code(
             기술2=excluded.기술2,
             기술3=excluded.기술3,
             기술4=excluded.기술4,
+            지급액=excluded.지급액,
             사용가능=excluded.사용가능,
+            공개여부=excluded.공개여부,
             설명=excluded.설명
-    """, (code, pokemon_num, form_value, level, *move_slots, max_uses, description))
+    """, (code, pokemon_num, form_value, level, *move_slots, money, max_uses, int(is_public), description))
     conn.commit()
 
     return {
         "success": True,
         "code": code,
-        "pokemon_name": pokemon_name,
+        "pokemon_name": pokemon_name or None,
         "pokemon_num": pokemon_num,
-        "form": form_name,
-        "level": level,
-        "moves": move_slots,
+        "form": form_name if pokemon_name else None,
+        "level": level if pokemon_name else None,
+        "moves": move_slots if pokemon_name else None,
+        "money": money,
         "max_uses": "무제한" if max_uses == 0 else max_uses,
+        "is_public": is_public,
     }
 
 
@@ -181,36 +215,53 @@ def use_code(conn, account_id: int, code: str, profile: int = 1) -> str:
     # 이번에 실제로 사용을 기록할 행은 "계정+이번 슬롯"의 것입니다. 슬롯이
     # 다르면 서로 다른 행(사용 횟수)으로 분리되어 각자 누적되지만, 위의
     # 사용 가능 여부 판단은 그 행들을 다시 합산한 값을 기준으로 합니다.
+    # 지급액_누적은 "지금 이 코드에 설정된 지급액"이 아니라 "그때그때 실제로
+    # 지급된 금액을 사용 횟수만큼 누적한 값"입니다 — 나중에 관리자가 코드의
+    # 지급액을 수정해도, 이미 지급된 과거 기록은 그 시점 값 그대로 남습니다.
+    code_money = code_row["지급액"] or 0
     conn.execute("""
-        INSERT INTO 코드사용기록 (계정_번호, 프로필_슬롯, 이상한소포_코드, 도감_번호, 사용)
-        VALUES (%s, %s, %s, %s, 1)
+        INSERT INTO 코드사용기록 (계정_번호, 프로필_슬롯, 이상한소포_코드, 도감_번호, 지급액_누적, 사용)
+        VALUES (%s, %s, %s, %s, %s, 1)
         ON CONFLICT(계정_번호, 프로필_슬롯, 이상한소포_코드) DO UPDATE SET
-            사용 = 코드사용기록.사용 + 1
-    """, (account_id, profile, code, code_row["도감_번호"]))
+            사용 = 코드사용기록.사용 + 1,
+            지급액_누적 = 코드사용기록.지급액_누적 + %s
+    """, (account_id, profile, code, code_row["도감_번호"], code_money, code_money))
 
-    # 포켓몬 지급. 레벨/기술은 이상한소포 테이블에 등록 시점에 저장된 값을 그대로 사용
+    # 포켓몬 지급. 도감_번호가 없는 코드(포켓몬 없이 지급액만 주는 코드)는
+    # 이 단계를 건너뜁니다 — 그렇지 않으면 존재하지 않는 포켓몬이 생성됩니다.
+    # 레벨/기술은 이상한소포 테이블에 등록 시점에 저장된 값을 그대로 사용
     # (register_code에서 POKEMON_INITIAL_MOVES로 자동 채워지거나, 관리자가 직접 지정한 값).
     # 어느 프로필(슬롯)에 넣을지는 poke.php 요청의 Profile(whichProfile) 값을 그대로 사용합니다.
     # 특성은 도감_번호로 자동 계산되는 파생값이라 저장하지 않습니다.
     # 획득경로는 웹 이상한소포 전용 대역(301=일반/302=색이다른/303=다크)을 모습에 맞춰 부여합니다.
     slot_number = profile
-    SHINY_TO_WEB_MYSTERY_EXTRA = {0: 301, 1: 302, 2: 303}
-    extra_value = SHINY_TO_WEB_MYSTERY_EXTRA.get(code_row["모습"], 301)
-    conn.execute("""
-        INSERT INTO 포켓몬
-        (계정_번호, 프로필_슬롯, 파티배치, 도감_번호, 별명, 레벨, 경험치,
-         기술1, 기술2, 기술3, 기술4, 사용기술,
-         공격대상, 태그, 어버이, 모습, 획득경로)
-        VALUES (%s, %s, NULL, %s, %s, %s, 0, %s, %s, %s, %s, 1, 1, 'n', 0, %s, %s)
-    """, (
-        account_id, slot_number,
-        code_row["도감_번호"],
-        get_pokemon_name_by_num(code_row["도감_번호"]),
-        code_row["레벨"],
-        code_row["기술1"], code_row["기술2"], code_row["기술3"], code_row["기술4"],
-        code_row["모습"],
-        extra_value,
-    ))
+    if code_row["도감_번호"] is not None:
+        SHINY_TO_WEB_MYSTERY_EXTRA = {0: 301, 1: 302, 2: 303}
+        extra_value = SHINY_TO_WEB_MYSTERY_EXTRA.get(code_row["모습"], 301)
+        conn.execute("""
+            INSERT INTO 포켓몬
+            (계정_번호, 프로필_슬롯, 파티배치, 도감_번호, 별명, 레벨, 경험치,
+             기술1, 기술2, 기술3, 기술4, 사용기술,
+             공격대상, 태그, 어버이, 모습, 획득경로)
+            VALUES (%s, %s, NULL, %s, %s, %s, 0, %s, %s, %s, %s, 1, 1, 'n', 0, %s, %s)
+        """, (
+            account_id, slot_number,
+            code_row["도감_번호"],
+            get_pokemon_name_by_num(code_row["도감_번호"]),
+            code_row["레벨"],
+            code_row["기술1"], code_row["기술2"], code_row["기술3"], code_row["기술4"],
+            code_row["모습"],
+            extra_value,
+        ))
+
+    # 지급액이 있으면 해당 프로필(슬롯)의 소지금에 더합니다. 포켓몬 지급과
+    # 독립적으로 동작하므로, 포켓몬+지급액을 함께 주는 코드도 그대로 동작합니다.
+    if code_row["지급액"]:
+        conn.execute(
+            "UPDATE 프로필 SET 소지금 = 소지금 + %s WHERE 계정_번호 = %s AND 슬롯 = %s",
+            (code_row["지급액"], account_id, slot_number)
+        )
+
     conn.commit()
 
     return "Result=Success"
@@ -226,17 +277,20 @@ def use_code(conn, account_id: int, code: str, profile: int = 1) -> str:
 def register_mystery_code(
     Token: str = Form(...),
     code: str = Form(...),
-    pokemon_name: str = Form(...),
-    form_name: str = Form(...),
+    pokemon_name: str = Form(""),
+    form_name: str = Form("일반"),
     max_uses: int = Form(1),
     description: str = Form(""),
     level: int = Form(1),
     moves: str = Form(None),
+    money: int = Form(0),
+    is_public: str = Form("1"),
 ):
     """
     moves: 쉼표로 구분된 기술 번호 문자열 (예: "5,22,0,0"). 생략하면
     POKEMON_INITIAL_MOVES에서 자동 조회. level이 1이 아니면 자동 매핑이
     맞지 않으므로 반드시 moves를 직접 지정할 것.
+    pokemon_name: 빈 문자열이면 포켓몬 없이 지급액(money)만 주는 코드로 등록.
     """
     conn = get_db()
     admin_account = require_admin(conn, Token)
@@ -267,7 +321,7 @@ def register_mystery_code(
 
     result = register_code(
         conn, code, pokemon_name, form_name, max_uses, description,
-        level=level, moves=move_list,
+        level=level, moves=move_list, money=money, is_public=(is_public == "1"),
     )
     conn.close()
     return result
@@ -391,7 +445,7 @@ def master_mysterycode_list(Token: str = Form(...)):
 
     rows = conn.execute("""
         SELECT 번호, 코드, 도감_번호, 모습, 레벨, 기술1, 기술2, 기술3, 기술4,
-               사용가능, 활성여부, 설명
+               지급액, 사용가능, 활성여부, 공개여부, 설명
         FROM 이상한소포
         ORDER BY 번호 DESC
     """).fetchall()
@@ -399,25 +453,28 @@ def master_mysterycode_list(Token: str = Form(...)):
 
     codes = []
     for row in rows:
+        dex = row["도감_번호"]
         # 도감_번호는 항상 실제 저장값(미싱노면 1010) 그대로 둡니다 — 이 화면은
         # 이미지 없이 텍스트 표라 화면표시용 0 변환(master_pokedex_list의
         # display_dex)이 필요 없고, 어차피 pokemon_name으로 이름을 같이 보여줍니다.
         codes.append({
             "id": row["번호"],
             "code": row["코드"],
-            "dex": row["도감_번호"],
-            "pokemon_name": get_pokemon_name_by_num(row["도감_번호"]),
-            "form": row["모습"],
-            "level": row["레벨"],
-            "moves": [row["기술1"], row["기술2"], row["기술3"], row["기술4"]],
+            "dex": dex,
+            "pokemon_name": get_pokemon_name_by_num(dex) if dex is not None else None,
+            "form": row["모습"] if dex is not None else None,
+            "level": row["레벨"] if dex is not None else None,
+            "moves": [row["기술1"], row["기술2"], row["기술3"], row["기술4"]] if dex is not None else None,
             "move_names": [
                 get_move_name_by_num(row["기술1"]) if row["기술1"] else "-",
                 get_move_name_by_num(row["기술2"]) if row["기술2"] else "-",
                 get_move_name_by_num(row["기술3"]) if row["기술3"] else "-",
                 get_move_name_by_num(row["기술4"]) if row["기술4"] else "-",
-            ],
+            ] if dex is not None else None,
+            "money": row["지급액"],
             "max_uses": row["사용가능"],
             "active": bool(row["활성여부"]),
+            "public": bool(row["공개여부"]),
             "description": row["설명"] or "",
         })
 
@@ -428,9 +485,11 @@ def master_mysterycode_list(Token: str = Form(...)):
 def master_mysterycode_update(
     Token: str = Form(...),
     id: int = Form(...),
-    form_name: str = Form(...),
-    level: int = Form(...),
+    form_name: str = Form(""),
+    level: int = Form(0),
     moves: str = Form(""),
+    money: int = Form(0),
+    is_public: str = Form("1"),
     max_uses: int = Form(...),
     active: int = Form(...),
     description: str = Form(""),
@@ -440,6 +499,9 @@ def master_mysterycode_update(
     이 화면에서 다루지 않습니다 — 코드는 사실상 PK 역할이라 등록 후에는 고정,
     포켓몬 종류를 바꾸고 싶으면 코드를 새로 등록하는 게 맞다는 판단입니다.
     moves: 쉼표로 구분된 기술 번호 문자열(예: "5,22,0,0"), 최대 4개.
+    form_name/level/moves는 도감_번호가 있는(포켓몬을 지급하는) 코드에만
+    의미가 있으므로, 돈 전용 코드(도감_번호 없음)는 이 필드들을 건드리지
+    않고 지급액/공개여부/사용가능/활성여부/설명만 갱신합니다.
     """
     conn = get_db()
     admin_account = require_admin(conn, Token)
@@ -447,24 +509,40 @@ def master_mysterycode_update(
         conn.close()
         return {"success": False, "error": "Forbidden"}
 
-    form_value = FORM_NAME_TO_VALUE.get(form_name)
-    if form_value is None:
+    existing = conn.execute(
+        "SELECT 도감_번호 FROM 이상한소포 WHERE 번호 = %s", (id,)
+    ).fetchone()
+    if existing is None:
         conn.close()
-        return {"success": False, "error": f"알 수 없는 형태: {form_name} (일반/샤이니/다크 중 하나)"}
+        return {"success": False, "error": "CodeNotFound"}
 
-    try:
-        move_list = [int(m.strip()) for m in moves.split(",") if m.strip()] if moves else []
-    except ValueError:
-        conn.close()
-        return {"success": False, "error": "InvalidMovesFormat"}
-    move_slots = (move_list + [0, 0, 0, 0])[:4]
+    is_pokemon_code = existing["도감_번호"] is not None
 
-    cur = conn.execute("""
-        UPDATE 이상한소포
-        SET 모습 = %s, 레벨 = %s, 기술1 = %s, 기술2 = %s, 기술3 = %s, 기술4 = %s,
-            사용가능 = %s, 활성여부 = %s, 설명 = %s
-        WHERE 번호 = %s
-    """, (form_value, level, *move_slots, max_uses, active, description, id))
+    if is_pokemon_code:
+        form_value = FORM_NAME_TO_VALUE.get(form_name)
+        if form_value is None:
+            conn.close()
+            return {"success": False, "error": f"알 수 없는 형태: {form_name} (일반/샤이니/다크 중 하나)"}
+
+        try:
+            move_list = [int(m.strip()) for m in moves.split(",") if m.strip()] if moves else []
+        except ValueError:
+            conn.close()
+            return {"success": False, "error": "InvalidMovesFormat"}
+        move_slots = (move_list + [0, 0, 0, 0])[:4]
+
+        cur = conn.execute("""
+            UPDATE 이상한소포
+            SET 모습 = %s, 레벨 = %s, 기술1 = %s, 기술2 = %s, 기술3 = %s, 기술4 = %s,
+                지급액 = %s, 사용가능 = %s, 활성여부 = %s, 공개여부 = %s, 설명 = %s
+            WHERE 번호 = %s
+        """, (form_value, level, *move_slots, money, max_uses, active, int(is_public == "1"), description, id))
+    else:
+        cur = conn.execute("""
+            UPDATE 이상한소포
+            SET 지급액 = %s, 사용가능 = %s, 활성여부 = %s, 공개여부 = %s, 설명 = %s
+            WHERE 번호 = %s
+        """, (money, max_uses, active, int(is_public == "1"), description, id))
 
     if cur.rowcount == 0:
         conn.close()
@@ -497,7 +575,8 @@ def master_mysterycode_usage_list(Token: str = Form(...)):
     rows = conn.execute("""
         SELECT 계정.이메일 AS 이메일, 코드사용기록.프로필_슬롯 AS 프로필_슬롯,
                코드사용기록.이상한소포_코드 AS 코드,
-               코드사용기록.도감_번호 AS 도감_번호, 코드사용기록.사용 AS 사용
+               코드사용기록.도감_번호 AS 도감_번호, 코드사용기록.지급액_누적 AS 지급액_누적,
+               코드사용기록.사용 AS 사용
         FROM 코드사용기록
         JOIN 계정 ON 계정.번호 = 코드사용기록.계정_번호
         ORDER BY 코드사용기록.이상한소포_코드, 계정.이메일, 코드사용기록.프로필_슬롯
@@ -511,6 +590,7 @@ def master_mysterycode_usage_list(Token: str = Form(...)):
             "profile_slot": row["프로필_슬롯"],
             "code": row["코드"],
             "pokemon_name": get_pokemon_name_by_num(row["도감_번호"]) if row["도감_번호"] else "-",
+            "money": row["지급액_누적"],
             "use_count": row["사용"],
         })
 

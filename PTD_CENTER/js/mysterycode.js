@@ -3,6 +3,12 @@
 // 이미 변환해서 내려줍니다(pokemon_name, move_names).
 
 function renderCard(row, container) {
+    // dex(도감_번호)가 없으면 "포켓몬 없이 돈만 지급하는 코드" — 전용 템플릿 사용.
+    if (row.dex === null || row.dex === undefined) {
+        renderMoneyCard(row, container);
+        return;
+    }
+
     const template = document.getElementById("mysterycode-card-template");
     const card = template.content.cloneNode(true).querySelector(".mysterycode-card");
 
@@ -28,6 +34,20 @@ function renderCard(row, container) {
         cell.textContent = moveName;
         moveTable.appendChild(cell);
     });
+
+    const usesText = row.max_uses === 0 ? "무제한" : `${row.max_uses}회`;
+    card.querySelector(".uses-value").textContent = usesText;
+
+    container.appendChild(card);
+}
+
+// 포켓몬 없이 지급액만 주는 코드 전용 카드.
+function renderMoneyCard(row, container) {
+    const template = document.getElementById("mysterycode-money-card-template");
+    const card = template.content.cloneNode(true).querySelector(".mysterycode-card");
+
+    card.querySelector(".code-value").textContent = row.code;
+    card.querySelector(".money-amount-value").textContent = `₩ ${row.money.toLocaleString()}`;
 
     const usesText = row.max_uses === 0 ? "무제한" : `${row.max_uses}회`;
     card.querySelector(".uses-value").textContent = usesText;

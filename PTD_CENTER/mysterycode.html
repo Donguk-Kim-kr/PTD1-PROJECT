@@ -81,6 +81,20 @@
         </div>
     </template>
 
+    <!-- 돈 지급 코드 전용 카드 템플릿 (포켓몬 없이 지급액만 지급하는 코드용) -->
+    <template id="mysterycode-money-card-template">
+        <div class="mysterycode-card money-card">
+            <div class="card-info-row">
+                <div class="cell cell-code"><div class="code-value"></div></div>
+                <div class="cell cell-money-amount"><div class="money-amount-value"></div></div>
+            </div>
+            <div class="card-divider"></div>
+            <div class="money-spacer"></div>
+            <div class="card-divider"></div>
+            <div class="uses-row">사용가능 : <span class="uses-value"></span></div>
+        </div>
+    </template>
+
     <script src="./js/auth.js"></script>
     <script src="./js/mysterycode.js"></script>
 </body>

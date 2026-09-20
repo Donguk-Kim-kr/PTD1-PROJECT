@@ -64,6 +64,28 @@
     border-color: #CBB8DE;
 }
 
+/* 돈 지급 코드 카드 - 포켓몬 카드와 다른 색으로 한눈에 구분되도록 */
+.mysterycode-card.money-card {
+    background: #E9F5E9;
+    border-color: #B8DEC0;
+}
+.mysterycode-card.money-card .cell-money-amount {
+    flex: 1 1 auto;
+    justify-content: center;
+}
+.mysterycode-card.money-card .money-amount-value {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #000;
+    white-space: nowrap;
+}
+
+/* move-table(기술표)이 차지하던 폭만큼 비워, uses-row가 포켓몬 카드와
+   같은 가로 위치에 오도록 맞춘다. */
+.mysterycode-card .money-spacer {
+    flex: 0 0 200px;
+}
+
 /* 코드 - 이미지 - 이름 - 레벨을 한 줄로 나열 */
 .mysterycode-card .card-info-row {
     flex: 0 0 340px;
