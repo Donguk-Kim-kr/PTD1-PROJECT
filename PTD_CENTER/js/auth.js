@@ -791,6 +791,51 @@ function showAlertModal(message) {
     confirmButton.focus();
 }
 
+// showAlertModal과 같은 모양이지만, "확인"/"취소" 두 버튼을 두어 되돌릴 수
+// 없는 작업(삭제 등) 전에 실수를 방지합니다. onConfirm은 "확인"을 눌렀을
+// 때만 호출됩니다.
+function showConfirmModal(message, onConfirm) {
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+
+    const card = document.createElement("div");
+    card.className = "modal-card";
+
+    const messageEl = document.createElement("div");
+    messageEl.className = "modal-message";
+    messageEl.textContent = message;
+
+    const actions = document.createElement("div");
+    actions.className = "modal-actions";
+
+    const confirmButton = document.createElement("button");
+    confirmButton.type = "button";
+    confirmButton.textContent = "확인";
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "modal-secondary";
+    cancelButton.textContent = "취소";
+
+    const close = () => {
+        teardown();
+        overlay.remove();
+    };
+    confirmButton.addEventListener("click", () => {
+        close();
+        onConfirm();
+    });
+    cancelButton.addEventListener("click", close);
+    const teardown = setupModalKeyboard(overlay, { onConfirm: () => { close(); onConfirm(); }, onCancel: close });
+
+    actions.appendChild(confirmButton);
+    actions.appendChild(cancelButton);
+    card.appendChild(messageEl);
+    card.appendChild(actions);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    cancelButton.focus();
+}
+
 // 비밀번호 변경 패널(#pw-change-panel) 공통 초기화.
 // #welcome fieldset 바로 아래에 같은 폭으로 붙는 패널이며, 모든 페이지(home/about/
 // inventory_*)가 같은 마크업을 가지므로 이 함수 하나로 공통 처리합니다.

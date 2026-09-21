@@ -1622,6 +1622,7 @@ function renderMysteryContent() {
         <div class="mystery-actions">
             <button type="button" class="mystery-action-button" id="mystery-add-button">추가</button>
             <button type="button" class="mystery-action-button" id="mystery-edit-button" disabled>수정</button>
+            <button type="button" class="mystery-action-button mystery-delete-button" id="mystery-delete-button" disabled>삭제</button>
         </div>
     `;
 
@@ -1634,11 +1635,31 @@ function renderMysteryContent() {
     });
 
     document.getElementById("mystery-edit-button").disabled = mysterySelectedId === null;
+    document.getElementById("mystery-delete-button").disabled = mysterySelectedId === null;
 
     document.getElementById("mystery-add-button").addEventListener("click", openMysteryAddModal);
     document.getElementById("mystery-edit-button").addEventListener("click", () => {
         const target = mysteryAllCodes.find((c) => c.id === mysterySelectedId);
         if (target) openMysteryEditModal(target);
+    });
+    document.getElementById("mystery-delete-button").addEventListener("click", () => {
+        const target = mysteryAllCodes.find((c) => c.id === mysterySelectedId);
+        if (!target) return;
+        showConfirmModal(`코드 "${target.code}"를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`, async () => {
+            const body = new URLSearchParams({ Token: getToken(), id: String(target.id) });
+            const res = await fetch(`${API_BASE}/master/mysterycode_delete`, { method: "POST", body });
+            const data = await res.json();
+            if (!data.success) {
+                const message = data.error === "CodeAlreadyUsed"
+                    ? "이미 사용된 적 있는 코드는 삭제할 수 없습니다. 활성여부를 비활성으로 바꿔 주세요."
+                    : "삭제에 실패했습니다.";
+                showAlertModal(message);
+                return;
+            }
+            mysterySelectedId = null;
+            mysteryAllCodes = await fetchMysteryCodes();
+            renderMysteryContent();
+        });
     });
 }
 

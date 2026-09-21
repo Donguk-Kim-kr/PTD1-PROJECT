@@ -453,7 +453,7 @@ def master_mysterycode_list(Token: str = Form(...)):
         SELECT 번호, 코드, 도감_번호, 모습, 레벨, 기술1, 기술2, 기술3, 기술4,
                지급액, 사용가능, 활성여부, 공개여부, 설명
         FROM 이상한소포
-        ORDER BY 번호 DESC
+        ORDER BY 번호 ASC
     """).fetchall()
     conn.close()
 
@@ -554,6 +554,44 @@ def master_mysterycode_update(
         conn.close()
         return {"success": False, "error": "CodeNotFound"}
 
+    conn.commit()
+    conn.close()
+    return {"success": True}
+
+
+@router.post("/master/mysterycode_delete")
+def master_mysterycode_delete(
+    Token: str = Form(...),
+    id: int = Form(...),
+):
+    """
+    코드를 완전히 삭제합니다. 안전을 위해, 이미 한 번이라도 사용된 적 있는
+    코드(코드사용기록에 그 코드에 대한 행이 존재)는 삭제를 거부합니다 —
+    이미 지급이 이뤄진 코드를 지우면 그 사용 이력이 무엇을 가리키는지
+    알 수 없게 되기 때문입니다. 이 경우 관리자는 "수정" 화면에서 활성여부를
+    비활성으로 바꿔 더 이상 쓸 수 없게 만드는 방법을 대신 씁니다.
+    """
+    conn = get_db()
+    admin_account = require_admin(conn, Token)
+    if admin_account is None:
+        conn.close()
+        return {"success": False, "error": "Forbidden"}
+
+    row = conn.execute(
+        "SELECT 코드 FROM 이상한소포 WHERE 번호 = %s", (id,)
+    ).fetchone()
+    if row is None:
+        conn.close()
+        return {"success": False, "error": "CodeNotFound"}
+
+    used = conn.execute(
+        "SELECT 1 FROM 코드사용기록 WHERE 이상한소포_코드 = %s LIMIT 1", (row["코드"],)
+    ).fetchone()
+    if used is not None:
+        conn.close()
+        return {"success": False, "error": "CodeAlreadyUsed"}
+
+    conn.execute("DELETE FROM 이상한소포 WHERE 번호 = %s", (id,))
     conn.commit()
     conn.close()
     return {"success": True}

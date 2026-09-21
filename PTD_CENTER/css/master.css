@@ -581,25 +581,23 @@ body.no-nav {
     width: 50px;
 }
 .mystery-table th:nth-child(6),
-.mystery-table td:nth-child(6),
+.mystery-table td:nth-child(6) {
+    width: 100px;
+}
 .mystery-table th:nth-child(7),
-.mystery-table td:nth-child(7),
+.mystery-table td:nth-child(7) {
+    width: 80px;
+}
 .mystery-table th:nth-child(8),
-.mystery-table td:nth-child(8),
+.mystery-table td:nth-child(8) {
+    width: 80px;
+}
 .mystery-table th:nth-child(9),
 .mystery-table td:nth-child(9) {
-    width: 105px;
+    width: 80px;
 }
 .mystery-table th:nth-child(10),
 .mystery-table td:nth-child(10) {
-    width: 80px;
-}
-.mystery-table th:nth-child(11),
-.mystery-table td:nth-child(11) {
-    width: 80px;
-}
-.mystery-table th:nth-child(12),
-.mystery-table td:nth-child(12) {
     width: 200px;
     white-space: normal;
 }
@@ -652,6 +650,16 @@ body.no-nav {
     color: #666;
     border-color: #2c2c2c;
     cursor: default;
+}
+
+/* 삭제는 되돌릴 수 없는 작업이라, 다른 버튼과 다른 색으로 구분한다. */
+.mystery-delete-button {
+    border-color: #7a2a2a;
+    color: #e08080;
+}
+.mystery-delete-button:hover:not(:disabled) {
+    background: #3a1a1a;
+    border-color: #a03a3a;
 }
 
 /* ── 등록/수정 폼 모달 공용 ────────────────────────────────── */
