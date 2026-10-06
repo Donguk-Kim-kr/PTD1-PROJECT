@@ -823,7 +823,6 @@ def handle_save_account(token: str, email: str, password: str, save_string: str)
                 "mSel": ("사용기술", "mSel", int),
                 "tag": ("태그", "tag", str),
                 "target": ("공격대상", "target", int),
-                "evolve": ("도감_번호", "evolve", int),
             }
 
             set_clauses = []
@@ -836,6 +835,18 @@ def handle_save_account(token: str, email: str, password: str, save_string: str)
                         if val is not None:
                             set_clauses.append(f"기술{m_num} = %s")
                             values.append(int(val))
+                elif field == "evolve":
+                    # SWF는 진화 시 num(진화 후 도감번호)과 nickname을 보냅니다.
+                    # 닉네임은 SWF가 이미 판단해서 보내므로(지정 안 했으면 새 종족명,
+                    # 직접 지었으면 그 이름) 서버는 받은 값을 저장만 합니다.
+                    num = data.get(f"poke{n}_num")
+                    if num is not None:
+                        set_clauses.append("도감_번호 = %s")
+                        values.append(int(num))
+                    nick = data.get(f"poke{n}_nickname")
+                    if nick is not None:
+                        set_clauses.append("별명 = %s")
+                        values.append(nick)
                 elif field in single_field_map:
                     column, source_key, cast = single_field_map[field]
                     val = data.get(f"poke{n}_{source_key}")
