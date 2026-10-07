@@ -17,10 +17,7 @@ let patchNoteSelectedDate = null; // 열려 있는 카드의 날짜. null이면 
 
 async function loadPatchNotes() {
     try {
-        // [임시 — 공개 전] 서버가 관리자 토큰만 허용합니다. 공개할 때는 Token을
-        // 보내는 이 줄(body)과 아래 fetch의 body 옵션을 함께 지웁니다.
-        const body = new URLSearchParams({ Token: getToken() });
-        const res = await fetch(`${API_BASE}/api/web/patchnote_list`, { method: "POST", body });
+        const res = await fetch(`${API_BASE}/api/web/patchnote_list`, { method: "POST" });
         const data = await res.json();
         if (!data.success) {
             throw new Error("patchnote_list failed");
@@ -34,7 +31,8 @@ async function loadPatchNotes() {
 }
 
 function formatPatchNoteDate(date) {
-    return String(date).replace(/-/g, ".");
+    const [year, month, day] = String(date).split("-");
+    return `${year}년 ${Number(month)}월 ${Number(day)}일`;
 }
 
 function createPatchNoteCard(note, selected) {
@@ -215,15 +213,7 @@ async function onProfileSelectChange() {
     await loadProfile(slot);
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-    // [임시 — 공개 전] 관리자만 볼 수 있습니다. 관리자 확인이 끝나기 전에는 본문을
-    // 숨기고, 로그인하지 않았거나 관리자가 아니면 requireAdmin()이 홈으로 돌려
-    // 보냅니다. 공개할 때는 아래 4줄(이 주석 포함 5줄)을 지웁니다.
-    const patchNoteContent = document.getElementById("patchnote-content");
-    patchNoteContent.style.display = "none";
-    if (!(await requireAdmin())) return;
-    patchNoteContent.style.display = "";
-
+document.addEventListener("DOMContentLoaded", () => {
     renderPatchNotes();
     loadPatchNotes();
 
