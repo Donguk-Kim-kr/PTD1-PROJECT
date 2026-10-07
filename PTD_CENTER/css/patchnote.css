@@ -1,0 +1,150 @@
+#patchnote-content {
+    width: 800px;
+    position: absolute;
+    top: 25px;
+    left: max(50%, 720px);
+    transform: translateX(-50%);
+    background: #F0EEE9d9;
+    border-radius: 10px;
+    font-size: 1rem;
+    padding: 20px;
+    box-sizing: border-box;
+    min-height: 650px;
+}
+
+#patchnote-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 8px 0;
+    margin-bottom: 30px;
+}
+
+/* 평소: 날짜 카드가 세로로 쌓인 목록. 카드 하나를 열면 그 카드만 남고
+   (선택된 카드), 아래로 패치 내용(#patchnote-detail)이 펼쳐집니다. */
+#patchnote-list {
+    display: flex;
+    flex-direction: column;
+    row-gap: 8px;
+}
+
+/* base.css의 전역 button 규칙(70x30, position:absolute, hover/active 배경색 등)을
+   덮어씁니다. hover/active 배경은 전역 button:hover 규칙이 우선순위가 더 높아
+   여기서 명시적으로 다시 지정해야 합니다. */
+.patchnote-card {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    width: 100%;
+    height: 48px;
+    background: #E7ECF2;
+    border: 1px solid #C7D2DE;
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #222;
+    cursor: pointer;
+}
+
+.patchnote-card:hover {
+    background: #E7ECF2;
+    border-color: #C7D2DE;
+    outline: 2px solid #4444ff;
+}
+
+.patchnote-card:active {
+    background: #DCE4EE;
+    border-color: #C7D2DE;
+}
+
+.patchnote-card.selected,
+.patchnote-card.selected:hover {
+    background: #DCE4EE;
+    border-color: #4444ff;
+}
+
+.patchnote-empty {
+    text-align: center;
+    padding: 40px 0;
+}
+
+/* 패치 내용: 관리자가 입력한 줄바꿈 그대로(pre-wrap) 보여줍니다. 글자는 HTML이
+   아니라 textContent로 넣으므로 태그가 있어도 글자 그대로 표시됩니다.
+   word-break는 기본값을 써서, 관리자 입력창(textarea)과 같은 규칙으로
+   (한글은 글자 단위로) 줄이 넘어갑니다. */
+#patchnote-detail {
+    margin-top: 20px;
+    max-height: 470px;
+    overflow-y: auto;
+    padding: 0 8px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    text-align: left;
+}
+
+#site-footer {
+    position: absolute;
+    bottom: 25px;
+    left: max(50%, 720px);
+    transform: translateX(-50%);
+    background-color: #F0EEE9d9;
+    text-align: center;
+    font-size: 12px;
+    padding: 8px 15px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.pagination {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+.pagination button {
+    position: static;
+    min-width: 32px;
+    width: auto;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #C7D2DE;
+    background: #F0EEE9;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+.pagination button:hover {
+    background: #E7ECF2;
+    border-color: #C7D2DE;
+}
+.pagination button:active {
+    background: #DCE4EE;
+    border-color: #C7D2DE;
+}
+.pagination button.active,
+.pagination button.active:hover {
+    background: #4444ff;
+    border-color: #4444ff;
+    color: #fff;
+    font-weight: bold;
+    cursor: default;
+}
+.pagination button:disabled,
+.pagination button:disabled:hover {
+    color: #aaa;
+    cursor: default;
+    background: #F0EEE9;
+    border-color: #C7D2DE;
+}

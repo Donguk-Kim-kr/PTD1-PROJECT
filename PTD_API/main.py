@@ -51,6 +51,7 @@ def init_db():
     # 트레이드(교환등록/교환조건/교환완료/수령대기) 테이블은 trade_routes.py가 전담.
     trade_routes.init_trade_tables(conn)
     master_routes.init_mystery_gift_tables(conn)
+    master_routes.init_patchnote_tables(conn)
     conn.commit()
     conn.close()
 

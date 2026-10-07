@@ -1109,6 +1109,7 @@ const MASTER_MENU = [
     { id: "mystery", label: "이상한소포 관리" },
     { id: "dbview", label: "DB 조회" },
     { id: "dbedit", label: "DB 수정" },
+    { id: "patchnote", label: "패치 노트" },
 ];
 
 function renderApp() {
@@ -1187,6 +1188,10 @@ function navigateTo(pageId) {
     }
     if (pageId === "dbedit") {
         renderDbEditPage();
+        return;
+    }
+    if (pageId === "patchnote") {
+        renderPatchnotePage();
         return;
     }
 
@@ -2582,4 +2587,226 @@ async function submitDbEditCell(cell, originalValue) {
     row[col] = newValue;
     cell.classList.remove("editing");
     cell.textContent = newValue;
+}
+
+// ══════════════════════════════════════════════
+// 패치 노트 화면
+//
+// 날짜당 한 행(날짜가 PK)이고 수정내역은 줄바꿈이 들어간 텍스트 한 덩어리입니다.
+// 이미 있는 날짜는 "추가"가 거부되므로 내용을 바꾸려면 행을 선택해 "수정"을 씁니다.
+// 날짜 자체는 수정할 수 없습니다(바꾸려면 삭제 후 새로 추가).
+// ══════════════════════════════════════════════
+
+let patchnoteAll = null;
+// 표에서 선택된 행의 날짜("YYYY-MM-DD"). null이면 미선택.
+let patchnoteSelectedDate = null;
+
+const PATCHNOTE_MAX_LENGTH = 5000; // master_routes.py의 PATCHNOTE_MAX_LENGTH와 동일
+
+const PATCHNOTE_ERROR_MESSAGES = {
+    InvalidDate: "날짜 형식이 올바르지 않습니다.",
+    EmptyContent: "수정내역을 입력해 주세요.",
+    ContentTooLong: `수정내역은 ${PATCHNOTE_MAX_LENGTH}자 이하로 입력해 주세요.`,
+    PatchNoteAlreadyExists: "이미 해당 날짜의 패치노트가 있습니다. 목록에서 선택해 수정해 주세요.",
+    PatchNoteNotFound: "해당 날짜의 패치노트를 찾을 수 없습니다.",
+    Forbidden: "권한이 없습니다.",
+};
+
+function patchnoteErrorMessage(code, fallback) {
+    return PATCHNOTE_ERROR_MESSAGES[code] || fallback;
+}
+
+async function fetchPatchnotes() {
+    const body = new URLSearchParams({ Token: getToken() });
+    const res = await fetch(`${API_BASE}/master/patchnote_list`, { method: "POST", body });
+    const data = await res.json();
+    return data.success ? data.notes : null;
+}
+
+async function renderPatchnotePage() {
+    const app = document.getElementById("app");
+    app.classList.add("app-wide");
+    app.innerHTML = `
+        ${renderPageNav("patchnote")}
+        <div class="page-content page-content-wide">
+            <h1 class="menu-title">패치 노트</h1>
+            <div class="patchnote-body mystery-tab-body">
+                <p>불러오는 중입니다...</p>
+            </div>
+        </div>
+    `;
+    attachPageNavHandlers();
+
+    patchnoteSelectedDate = null;
+    const notes = await fetchPatchnotes();
+    if (notes === null) {
+        document.querySelector(".patchnote-body").innerHTML = "<p>목록을 불러오지 못했습니다.</p>";
+        return;
+    }
+    patchnoteAll = notes;
+    renderPatchnoteContent();
+}
+
+function renderPatchnoteContent() {
+    const content = document.querySelector(".patchnote-body");
+
+    const rows = patchnoteAll
+        .map((n) => {
+            const selected = n.date === patchnoteSelectedDate ? " selected" : "";
+            // 표에는 첫 줄만 미리 보여주고, 줄이 더 있으면 " …"을 붙입니다.
+            const lines = n.content.split("\n");
+            const preview = lines[0] + (lines.length > 1 ? " …" : "");
+            return `
+                <tr class="mystery-row${selected}" data-date="${n.date}">
+                    <td>${n.date}</td>
+                    <td class="patchnote-preview-cell">${escapeHtml(preview)}</td>
+                </tr>
+            `;
+        })
+        .join("");
+
+    content.innerHTML = `
+        <div class="mystery-table-wrap">
+            <table class="mystery-table patchnote-table">
+                <thead>
+                    <tr><th>날짜</th><th>수정내역</th></tr>
+                </thead>
+                <tbody>${rows || `<tr><td colspan="2" class="mystery-empty">등록된 패치노트가 없습니다.</td></tr>`}</tbody>
+            </table>
+        </div>
+        <div class="mystery-actions">
+            <button type="button" class="mystery-action-button" id="patchnote-add-button">추가</button>
+            <button type="button" class="mystery-action-button" id="patchnote-edit-button" disabled>수정</button>
+            <button type="button" class="mystery-action-button mystery-delete-button" id="patchnote-delete-button" disabled>삭제</button>
+        </div>
+    `;
+
+    content.querySelectorAll(".mystery-row").forEach((tr) => {
+        tr.addEventListener("click", () => {
+            const date = tr.dataset.date;
+            patchnoteSelectedDate = patchnoteSelectedDate === date ? null : date;
+            renderPatchnoteContent();
+        });
+    });
+
+    document.getElementById("patchnote-edit-button").disabled = patchnoteSelectedDate === null;
+    document.getElementById("patchnote-delete-button").disabled = patchnoteSelectedDate === null;
+
+    document.getElementById("patchnote-add-button").addEventListener("click", openPatchnoteAddModal);
+    document.getElementById("patchnote-edit-button").addEventListener("click", () => {
+        const target = patchnoteAll.find((n) => n.date === patchnoteSelectedDate);
+        if (target) openPatchnoteEditModal(target);
+    });
+    document.getElementById("patchnote-delete-button").addEventListener("click", () => {
+        const target = patchnoteAll.find((n) => n.date === patchnoteSelectedDate);
+        if (!target) return;
+        showConfirmModal(`${target.date} 패치노트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`, async () => {
+            const body = new URLSearchParams({ Token: getToken(), date: target.date });
+            const res = await fetch(`${API_BASE}/master/patchnote_delete`, { method: "POST", body });
+            const data = await res.json();
+            if (!data.success) {
+                showAlertModal(patchnoteErrorMessage(data.error, "삭제에 실패했습니다."));
+                return;
+            }
+            patchnoteSelectedDate = null;
+            patchnoteAll = (await fetchPatchnotes()) || [];
+            renderPatchnoteContent();
+        });
+    });
+}
+
+// 브라우저 로컬 기준 오늘 날짜를 "YYYY-MM-DD"로 만듭니다(추가 모달의 기본값).
+function patchnoteTodayString() {
+    const d = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+function showPatchnoteFormError(message) {
+    const el = document.getElementById("patchnote-form-error");
+    el.textContent = message;
+    el.style.display = "block";
+}
+
+function closePatchnoteModal() {
+    const modal = document.getElementById("patchnote-modal");
+    if (modal) modal.remove();
+}
+
+// 추가/수정 모달 공통 골격. isEdit이면 날짜 입력란을 읽기 전용으로 둡니다.
+function openPatchnoteModal({ title, date, content, isEdit, submitLabel, onSubmit }) {
+    document.body.insertAdjacentHTML("beforeend", `
+        <div class="modal-overlay" id="patchnote-modal">
+            <div class="modal-card mystery-form-card patchnote-form-card">
+                <h2 class="mystery-form-title">${title}</h2>
+                <div class="mystery-form-row">
+                    <label for="patchnote-form-date">날짜</label>
+                    <input type="date" id="patchnote-form-date" value="${date}"${isEdit ? " readonly" : ""}>
+                </div>
+                <div class="mystery-form-row">
+                    <label for="patchnote-form-content">수정내역 (줄바꿈이 그대로 표시됩니다)</label>
+                    <textarea id="patchnote-form-content" class="patchnote-textarea" maxlength="${PATCHNOTE_MAX_LENGTH}">${escapeHtml(content)}</textarea>
+                </div>
+                <p class="mystery-form-error" id="patchnote-form-error" style="display:none;"></p>
+                <div class="modal-actions">
+                    <button type="button" id="patchnote-form-submit">${submitLabel}</button>
+                    <button type="button" class="modal-secondary" id="patchnote-form-cancel">취소</button>
+                </div>
+            </div>
+        </div>
+    `);
+
+    document.getElementById("patchnote-form-cancel").addEventListener("click", closePatchnoteModal);
+    document.getElementById("patchnote-form-submit").addEventListener("click", onSubmit);
+}
+
+function openPatchnoteAddModal() {
+    openPatchnoteModal({
+        title: "패치 노트 추가",
+        date: patchnoteTodayString(),
+        content: "",
+        isEdit: false,
+        submitLabel: "추가",
+        onSubmit: () => submitPatchnote("patchnote_add", "등록에 실패했습니다."),
+    });
+}
+
+function openPatchnoteEditModal(target) {
+    openPatchnoteModal({
+        title: "패치 노트 수정",
+        date: target.date,
+        content: target.content,
+        isEdit: true,
+        submitLabel: "저장",
+        onSubmit: () => submitPatchnote("patchnote_update", "수정에 실패했습니다."),
+    });
+}
+
+async function submitPatchnote(endpoint, failMessage) {
+    const date = document.getElementById("patchnote-form-date").value;
+    const content = document.getElementById("patchnote-form-content").value;
+
+    if (!date) {
+        showPatchnoteFormError("날짜를 선택해 주세요.");
+        return;
+    }
+    if (!content.trim()) {
+        showPatchnoteFormError("수정내역을 입력해 주세요.");
+        return;
+    }
+
+    const body = new URLSearchParams({ Token: getToken(), date, content });
+    const res = await fetch(`${API_BASE}/master/${endpoint}`, { method: "POST", body });
+    const data = await res.json();
+
+    if (!data.success) {
+        showPatchnoteFormError(patchnoteErrorMessage(data.error, failMessage));
+        return;
+    }
+
+    closePatchnoteModal();
+    patchnoteSelectedDate = null;
+    patchnoteAll = (await fetchPatchnotes()) || [];
+    renderPatchnoteContent();
 }

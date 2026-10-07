@@ -1280,3 +1280,56 @@ body.no-nav {
         font-size: 0.9rem;
     }
 }
+
+/* ══════════════════════════════════════════════
+   패치 노트 화면
+   ══════════════════════════════════════════════ */
+
+/* .mystery-table의 nth-child 폭(1열 50px, 2열 120px)을 이 표(날짜/수정내역
+   2열)에 맞게 덮어씁니다. 우선순위가 같아 파일에서 뒤에 있는 이 규칙이
+   적용됩니다. */
+.patchnote-table th:nth-child(1),
+.patchnote-table td:nth-child(1) {
+    width: 140px;
+}
+.patchnote-table th:nth-child(2),
+.patchnote-table td:nth-child(2) {
+    width: auto;
+}
+
+/* 수정내역 미리보기(첫 줄)만 왼쪽 정렬. 넘치면 ...로 잘립니다
+   (.mystery-table td의 nowrap/ellipsis를 그대로 사용). */
+.patchnote-table td.patchnote-preview-cell {
+    text-align: left;
+}
+
+/* 추가/수정 모달: 본문 입력란이 넓어야 해서 폭만 키웁니다. */
+.mystery-form-card.patchnote-form-card {
+    width: 640px;
+    max-width: calc(100vw - 40px);
+}
+.patchnote-form-card input[type="date"] {
+    color-scheme: dark;
+}
+.patchnote-form-card input[readonly] {
+    color: #808080;
+}
+
+.patchnote-textarea {
+    width: 100%;
+    height: 320px;
+    max-height: 50vh;
+    padding: 8px 10px;
+    border: 1px solid #3a3a3a;
+    background: #121212;
+    color: #e8e8e8;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    resize: vertical;
+}
+.patchnote-textarea:focus {
+    outline: none;
+    border-color: #4444ff;
+}

@@ -16,6 +16,7 @@
 삭제되었습니다. use_code()의 실행 로직 자체는 변경 없이 그대로 옮겨졌습니다.
 """
 
+from datetime import datetime
 from fastapi import APIRouter, Form
 
 from auth import get_db, require_admin, to_kst_display
@@ -86,6 +87,19 @@ def init_mystery_gift_tables(conn):
     conn.execute("ALTER TABLE 코드사용기록 ADD COLUMN IF NOT EXISTS 지급액_누적 INTEGER NOT NULL DEFAULT 0")
     conn.commit()
 
+def init_patchnote_tables(conn):
+    """
+    main.py의 init_db()에서 호출해서 패치노트 테이블을 만듭니다.
+    날짜당 한 행이며, 수정내역은 줄바꿈이 포함된 텍스트 그대로 저장합니다
+    (화면에서는 줄바꿈과 공백을 쓴 그대로 보여주므로 모양은 작성자가 정함).
+    """
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS 패치노트 (
+            날짜 DATE PRIMARY KEY,
+            수정내역 TEXT NOT NULL
+        )
+    """)
+    conn.commit()
 
 def register_code(
     conn,
@@ -640,6 +654,143 @@ def master_mysterycode_usage_list(Token: str = Form(...)):
 
     return {"success": True, "usage": usage}
 
+# ══════════════════════════════════════════════
+# 관리자용: 패치노트 (관리자 페이지의 "패치 노트" 탭)
+#
+# 날짜당 한 행(날짜가 PK)이고, 수정내역은 줄바꿈이 들어간 텍스트 한 덩어리입니다.
+# 같은 날짜에 패치를 더 올리고 싶으면 새로 추가하지 않고 그 날짜의 수정내역을
+# 수정합니다(추가는 이미 있는 날짜면 거부). 날짜 자체는 수정할 수 없습니다 —
+# 날짜를 바꾸려면 삭제 후 새로 추가합니다.
+# 사이트에 공개되는 목록은 web_routes.py 쪽 공개 엔드포인트가 따로 맡습니다.
+# ══════════════════════════════════════════════
+
+PATCHNOTE_MAX_LENGTH = 5000
+
+
+def validate_patchnote_input(date: str, content: str):
+    """
+    (날짜 객체, 정리된 내용, 에러 코드)를 돌려줍니다. 에러가 없으면 에러 코드는 None.
+    날짜는 YYYY-MM-DD 형식만 받습니다. 내용은 줄바꿈을 \\n으로 통일하고(브라우저
+    입력창은 \\r\\n으로 보내기도 함) 앞쪽 빈 줄과 뒤쪽 공백만 제거합니다 — 줄 앞의
+    공백(들여쓰기)은 작성자가 모양을 잡은 것이므로 그대로 둡니다.
+    """
+    try:
+        date_value = datetime.strptime(date.strip(), "%Y-%m-%d").date()
+    except ValueError:
+        return None, None, "InvalidDate"
+
+    text = content.replace("\r\n", "\n").replace("\r", "\n").lstrip("\n").rstrip()
+    if not text:
+        return None, None, "EmptyContent"
+    if len(text) > PATCHNOTE_MAX_LENGTH:
+        return None, None, "ContentTooLong"
+    return date_value, text, None
+
+
+@router.post("/master/patchnote_list")
+def master_patchnote_list(Token: str = Form(...)):
+    conn = get_db()
+    admin_account = require_admin(conn, Token)
+    if admin_account is None:
+        conn.close()
+        return {"success": False, "error": "Forbidden"}
+
+    rows = conn.execute(
+        "SELECT 날짜, 수정내역 FROM 패치노트 ORDER BY 날짜 DESC"
+    ).fetchall()
+    conn.close()
+
+    notes = [{"date": row["날짜"].isoformat(), "content": row["수정내역"]} for row in rows]
+    return {"success": True, "notes": notes}
+
+
+@router.post("/master/patchnote_add")
+def master_patchnote_add(
+    Token: str = Form(...),
+    date: str = Form(...),
+    content: str = Form(...),
+):
+    conn = get_db()
+    admin_account = require_admin(conn, Token)
+    if admin_account is None:
+        conn.close()
+        return {"success": False, "error": "Forbidden"}
+
+    date_value, text, error = validate_patchnote_input(date, content)
+    if error is not None:
+        conn.close()
+        return {"success": False, "error": error}
+
+    # 이미 있는 날짜면 INSERT가 아무 행도 만들지 않고(rowcount 0) 넘어갑니다 —
+    # 실수로 기존 패치노트를 덮어쓰지 않도록, 수정은 아래 update 엔드포인트로만 합니다.
+    cur = conn.execute(
+        "INSERT INTO 패치노트 (날짜, 수정내역) VALUES (%s, %s) ON CONFLICT (날짜) DO NOTHING",
+        (date_value, text),
+    )
+    if cur.rowcount == 0:
+        conn.close()
+        return {"success": False, "error": "PatchNoteAlreadyExists"}
+
+    conn.commit()
+    conn.close()
+    return {"success": True}
+
+
+@router.post("/master/patchnote_update")
+def master_patchnote_update(
+    Token: str = Form(...),
+    date: str = Form(...),
+    content: str = Form(...),
+):
+    conn = get_db()
+    admin_account = require_admin(conn, Token)
+    if admin_account is None:
+        conn.close()
+        return {"success": False, "error": "Forbidden"}
+
+    date_value, text, error = validate_patchnote_input(date, content)
+    if error is not None:
+        conn.close()
+        return {"success": False, "error": error}
+
+    cur = conn.execute(
+        "UPDATE 패치노트 SET 수정내역 = %s WHERE 날짜 = %s",
+        (text, date_value),
+    )
+    if cur.rowcount == 0:
+        conn.close()
+        return {"success": False, "error": "PatchNoteNotFound"}
+
+    conn.commit()
+    conn.close()
+    return {"success": True}
+
+
+@router.post("/master/patchnote_delete")
+def master_patchnote_delete(
+    Token: str = Form(...),
+    date: str = Form(...),
+):
+    conn = get_db()
+    admin_account = require_admin(conn, Token)
+    if admin_account is None:
+        conn.close()
+        return {"success": False, "error": "Forbidden"}
+
+    try:
+        date_value = datetime.strptime(date.strip(), "%Y-%m-%d").date()
+    except ValueError:
+        conn.close()
+        return {"success": False, "error": "InvalidDate"}
+
+    cur = conn.execute("DELETE FROM 패치노트 WHERE 날짜 = %s", (date_value,))
+    if cur.rowcount == 0:
+        conn.close()
+        return {"success": False, "error": "PatchNoteNotFound"}
+
+    conn.commit()
+    conn.close()
+    return {"success": True}
 
 # ══════════════════════════════════════════════
 # 관리자용: DB 조회 화면 (관리자 페이지의 "DB 조회" 탭)

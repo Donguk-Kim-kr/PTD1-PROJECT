@@ -9,7 +9,7 @@
 from fastapi import APIRouter, Form
 from fastapi.responses import PlainTextResponse
 
-from auth import get_db, get_account_by_token, password_hasher
+from auth import get_db, get_account_by_token, password_hasher, require_admin
 from move_data import get_move_name_by_num
 from pokemon_data import NON_PLAYABLE_DEX_NUMBERS, get_pokemon_name_by_num
 from urllib.parse import quote
@@ -429,3 +429,23 @@ def web_mysterycode_list():
         })
 
     return {"success": True, "codes": codes}
+
+
+
+# 패치노트 목록.
+# [임시 — 공개 전] 지금은 관리자만 조회할 수 있습니다. 일반 공개할 때는
+# Token 파라미터와 아래 if 블록(3줄)을 지우면 로그인 없이 누구나 볼 수 있습니다.
+@router.post("/api/web/patchnote_list")
+def web_patchnote_list(Token: str = Form(...)):
+    conn = get_db()
+    if require_admin(conn, Token) is None:
+        conn.close()
+        return {"success": False, "error": "Forbidden"}
+
+    rows = conn.execute(
+        "SELECT 날짜, 수정내역 FROM 패치노트 ORDER BY 날짜 DESC"
+    ).fetchall()
+    conn.close()
+
+    notes = [{"date": row["날짜"].isoformat(), "content": row["수정내역"]} for row in rows]
+    return {"success": True, "notes": notes}
