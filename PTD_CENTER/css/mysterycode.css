@@ -1,7 +1,7 @@
 #site-footer {
     position: absolute;
     bottom: 25px;
-    left: 50%;
+    left: max(50%, 720px);
     transform: translateX(-50%);
     background-color: #F0EEE9d9;
     text-align: center;
@@ -15,7 +15,7 @@
     width: 800px;
     position: absolute;
     top: 25px;
-    left: 50%;
+    left: max(50%, 720px);
     transform: translateX(-50%);
     background: #F0EEE9d9;
     border-radius: 10px;
