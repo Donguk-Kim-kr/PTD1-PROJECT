@@ -2349,6 +2349,8 @@ const DB_EDIT_TABLE_NAMES = Object.keys(DB_EDIT_TABLES);
 
 let dbEditCurrentTable = DB_EDIT_TABLE_NAMES[0];
 let dbEditCache = {};
+// 컬럼명 -> 필터 텍스트. 테이블을 바꾸면 초기화됩니다.
+let dbEditFilters = {};
 
 async function renderDbEditPage() {
     const app = document.getElementById("app");
@@ -2376,6 +2378,7 @@ async function renderDbEditPage() {
         btn.addEventListener("click", async () => {
             if (btn.dataset.table === dbEditCurrentTable) return;
             dbEditCurrentTable = btn.dataset.table;
+            dbEditFilters = {};
             document.querySelectorAll(".dbview-table-select .dex-form-button").forEach((b) => {
                 b.classList.toggle("active", b === btn);
             });
@@ -2403,15 +2406,28 @@ async function loadAndRenderDbEditTable() {
     renderDbEditContent();
 }
 
-function renderDbEditContent() {
-    const body = document.querySelector(".dbedit-body");
+// 현재 필터 조건에 맞는 행만 골라 {row, rowIndex} 목록으로 돌려줍니다.
+// rowIndex는 캐시(rows) 안의 원래 위치입니다. 셀을 수정할 때 어느 행인지
+// 찾는 데 쓰므로, 필터로 행이 걸러져도 걸러내기 전의 위치를 그대로 유지합니다.
+function getDbEditFilteredRows() {
     const { columns, rows } = dbEditCache[dbEditCurrentTable];
+    const result = [];
+    rows.forEach((row, rowIndex) => {
+        const matches = columns.every((col) => {
+            const filterText = (dbEditFilters[col] || "").trim();
+            if (!filterText) return true;
+            return String(row[col] ?? "").toLowerCase().includes(filterText.toLowerCase());
+        });
+        if (matches) result.push({ row, rowIndex });
+    });
+    return result;
+}
+
+function buildDbEditRowsHtml(filtered) {
+    const { columns } = dbEditCache[dbEditCurrentTable];
     const spec = DB_EDIT_TABLES[dbEditCurrentTable];
-
-    const headerHtml = columns.map((col) => `<th>${col}</th>`).join("");
-
-    const rowsHtml = rows
-        .map((row, rowIndex) => {
+    return filtered
+        .map(({ row, rowIndex }) => {
             const cellsHtml = columns
                 .map((col) => {
                     const editable = spec.editable.includes(col);
@@ -2425,19 +2441,60 @@ function renderDbEditContent() {
             return `<tr>${cellsHtml}</tr>`;
         })
         .join("");
+}
 
-    body.innerHTML = `
-        <div class="mystery-table-wrap dbview-table-wrap">
-            <table class="mystery-table dbview-table">
-                <thead><tr>${headerHtml}</tr></thead>
-                <tbody>${rowsHtml || `<tr><td colspan="${columns.length}" class="mystery-empty">표시할 행이 없습니다.</td></tr>`}</tbody>
-            </table>
-        </div>
-    `;
-
+function attachDbEditCellHandlers(body) {
     body.querySelectorAll(".dbedit-editable-cell").forEach((cell) => {
         cell.addEventListener("click", () => openDbEditCellInput(cell));
     });
+}
+
+// 필터 입력 중에는 입력창을 건드리지 않고 표 본문과 행 수 문구만 갱신합니다.
+// (입력창을 다시 만들면 한글 IME 조합이 끊겨 자모가 낱개로 입력됩니다.)
+function updateDbEditRows() {
+    const body = document.querySelector(".dbedit-body");
+    const { columns, rows } = dbEditCache[dbEditCurrentTable];
+    const filtered = getDbEditFilteredRows();
+
+    body.querySelector("tbody").innerHTML =
+        buildDbEditRowsHtml(filtered) || `<tr><td colspan="${columns.length}" class="mystery-empty">표시할 행이 없습니다.</td></tr>`;
+    body.querySelector(".dbview-row-count").textContent = `${filtered.length}행 / 전체 ${rows.length}행`;
+    attachDbEditCellHandlers(body);
+}
+
+function renderDbEditContent() {
+    const body = document.querySelector(".dbedit-body");
+    const { columns, rows } = dbEditCache[dbEditCurrentTable];
+    const filtered = getDbEditFilteredRows();
+
+    const headerHtml = columns
+        .map(
+            (col) => `
+                <th>
+                    <div class="dbview-th-label">${col}</div>
+                    <input type="text" class="dbview-filter-input" data-col="${col}" value="${(dbEditFilters[col] || "").replace(/"/g, "&quot;")}" placeholder="필터">
+                </th>
+            `
+        )
+        .join("");
+
+    body.innerHTML = `
+        <div class="mystery-table-wrap dbview-table-wrap">
+            <table class="mystery-table dbview-table" style="--dbview-col-count: ${columns.length}">
+                <thead><tr>${headerHtml}</tr></thead>
+                <tbody>${buildDbEditRowsHtml(filtered) || `<tr><td colspan="${columns.length}" class="mystery-empty">표시할 행이 없습니다.</td></tr>`}</tbody>
+            </table>
+        </div>
+        <p class="dbview-row-count">${filtered.length}행 / 전체 ${rows.length}행</p>
+    `;
+
+    body.querySelectorAll(".dbview-filter-input").forEach((input) => {
+        input.addEventListener("input", () => {
+            dbEditFilters[input.dataset.col] = input.value;
+            updateDbEditRows();
+        });
+    });
+    attachDbEditCellHandlers(body);
 }
 
 function openDbEditCellInput(cell) {
