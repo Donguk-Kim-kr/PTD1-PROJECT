@@ -2289,18 +2289,39 @@ function renderDbViewContent() {
     body.querySelectorAll(".dbview-filter-input").forEach((input) => {
         input.addEventListener("input", () => {
             dbViewFilters[input.dataset.col] = input.value;
-            // 커서 위치를 잃지 않도록, 이 입력창 값만 갱신 대상에서 보존하며
-            // 전체를 다시 그린 뒤 포커스와 커서 위치를 되돌립니다.
-            const col = input.dataset.col;
-            const selectionStart = input.selectionStart;
-            renderDbViewContent();
-            const newInput = body.querySelector(`.dbview-filter-input[data-col="${CSS.escape(col)}"]`);
-            if (newInput) {
-                newInput.focus();
-                newInput.setSelectionRange(selectionStart, selectionStart);
-            }
+            updateDbViewRows();
         });
     });
+}
+
+// 필터 입력 중에는 입력창을 건드리지 않고 표 본문과 행 수 문구만 갱신합니다.
+// (입력창을 다시 만들면 한글 IME 조합이 끊겨 자모가 낱개로 입력됩니다.)
+function updateDbViewRows() {
+    const { columns, rows } = dbViewCache[dbViewCurrentTable];
+
+    const filteredRows = rows.filter((row) =>
+        columns.every((col) => {
+            const filterText = (dbViewFilters[col] || "").trim();
+            if (!filterText) return true;
+            const cellValue = row[col];
+            return String(cellValue ?? "").toLowerCase().includes(filterText.toLowerCase());
+        })
+    );
+
+    const rowsHtml = filteredRows
+        .map(
+            (row) => `
+                <tr>
+                    ${columns.map((col) => `<td>${escapeHtml(row[col])}</td>`).join("")}
+                </tr>
+            `
+        )
+        .join("");
+
+    document.querySelector(".dbview-table tbody").innerHTML =
+        rowsHtml || `<tr><td colspan="${columns.length}" class="mystery-empty">표시할 행이 없습니다.</td></tr>`;
+    document.querySelector(".dbview-row-count").textContent =
+        `${filteredRows.length}행 / 전체 ${rows.length}행`;
 }
 
 // ══════════════════════════════════════════════
@@ -2322,6 +2343,7 @@ const DB_EDIT_TABLES = {
     "계정": { pk: ["번호"], editable: ["역할"] },
     "프로필": { pk: ["계정_번호", "슬롯"], editable: ["소지금", "스토리달성도", "챌린지달성도"] },
     "업적": { pk: ["계정_번호", "프로필_슬롯", "번호"], editable: ["조건1", "조건2", "조건3", "조건4", "수령여부"] },
+    "포켓몬": { pk: ["번호"], editable: ["도감_번호", "레벨", "모습", "획득경로"] },
 };
 const DB_EDIT_TABLE_NAMES = Object.keys(DB_EDIT_TABLES);
 
@@ -2481,9 +2503,20 @@ async function submitDbEditCell(cell, originalValue) {
     const data = await res.json();
 
     if (!data.success) {
-        showAlertModal(data.error === "RowNotFound" ? "해당 행을 찾을 수 없습니다." : "수정에 실패했습니다.");
+        showAlertModal(
+            data.error === "RowNotFound" ? "해당 행을 찾을 수 없습니다."
+            : data.error === "InvalidValue" ? "허용되지 않는 값입니다."
+            : "수정에 실패했습니다."
+        );
         cell.classList.remove("editing");
         cell.textContent = originalValue;
+        return;
+    }
+
+    // 도감_이름은 서버가 도감_번호로 계산한 값이라, 번호를 고치면 캐시를 버리고 다시 불러옵니다.
+    if (col === "도감_번호") {
+        delete dbEditCache[dbEditCurrentTable];
+        await loadAndRenderDbEditTable();
         return;
     }
 

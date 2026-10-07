@@ -672,7 +672,7 @@ DB_VIEW_TABLES = {
         "연결의끈", "낡은낚싯대", "실프스코프", "대단한낚싯대", "승선티켓",
     ],
     "업적": ["계정_번호", "프로필_슬롯", "번호", "조건1", "조건2", "조건3", "조건4", "수령여부"],
-    "포켓몬": ["계정_번호", "프로필_슬롯", "도감_번호", "파티배치", "레벨", "모습", "획득경로"],
+    "포켓몬": ["번호", "계정_번호", "프로필_슬롯", "도감_번호", "파티배치", "레벨", "모습", "획득경로"],
     "놓아준포켓몬": ["계정_번호", "프로필_슬롯", "도감_번호", "레벨", "모습", "획득경로", "이유"],
     "아바타": ["계정_번호", "프로필_슬롯"] + [f"아바타{n}" for n in range(1, 20)],
     "교환등록": ["번호", "계정_번호", "포켓몬_번호", "도감_번호", "레벨", "모습", "상태", "등록일시"],
@@ -772,6 +772,10 @@ DB_EDIT_TABLES = {
         "pk": ["계정_번호", "프로필_슬롯", "번호"],
         "editable": ["조건1", "조건2", "조건3", "조건4", "수령여부"],
     },
+    "포켓몬": {
+        "pk": ["번호"],
+        "editable": ["도감_번호", "레벨", "모습", "획득경로"],
+    },
 }
 
 
@@ -797,6 +801,22 @@ def master_db_table_update(
     if column not in edit_spec["editable"]:
         conn.close()
         return {"success": False, "error": "ColumnNotEditable"}
+
+    # 포켓몬 테이블은 게임이 이 값을 그대로 불러가므로, 범위를 벗어난 값은 막습니다.
+    if table == "포켓몬":
+        try:
+            int_value = int(value)
+        except ValueError:
+            conn.close()
+            return {"success": False, "error": "InvalidValue"}
+        ranges = {"레벨": (1, 100), "모습": (0, 2), "획득경로": (0, 999)}
+        if column in ranges and not (ranges[column][0] <= int_value <= ranges[column][1]):
+            conn.close()
+            return {"success": False, "error": "InvalidValue"}
+        if column == "도감_번호" and get_pokemon_name_by_num(int_value) == "Unknown":
+            conn.close()
+            return {"success": False, "error": "InvalidValue"}
+        value = int_value
 
     # pk_values 파싱 및 검증: 이 테이블의 PK 컬럼과 정확히 일치해야 함(하나라도
     # 빠지거나 모르는 컬럼이 섞이면 거부) — WHERE 절에 들어갈 컬럼명을 클라이언트
