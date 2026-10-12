@@ -46,23 +46,24 @@ router = APIRouter()
 # 표시하므로 백엔드 이 파일만 고치면 됩니다.
 # ══════════════════════════════════════════════
 
-# 포켓몬 경품 코너 지정 판매: {도감번호: 가격}. 각 종마다 일반(0)/샤이니(1) 두
-# 모습을 파는데 가격은 모습과 무관하게 도감번호 하나로 동일합니다.
+# 포켓몬 경품 코너 지정 판매: {도감번호: (일반 가격, 샤이니 가격)}. 각 종마다
+# 일반(0)/샤이니(1) 두 모습을 파는데 가격은 모습별로 따로 정합니다.
 POKEMON_SHOP_FIXED_PRICES = {
-    63: 5000,   # 캐이시
-    147: 5000,  # 미뇽
-    123: 5000,  # 스라크
-    127: 5000,  # 쁘사이저
-    35: 5000,   # 삐삐
-    137: 5000,  # 폴리곤
-    39: 5000,   # 푸린
-    52: 5000,   # 나옹
-    133: 5000,  # 이브이
+    35: (1000, 5000),   # 삐삐
+    39: (1000, 5000),   # 푸린
+    52: (2000, 10000),   # 나옹
+    63: (3000, 15000),   # 캐이시
+    116: (4000, 20000), # 쏘드라
+    123: (5000, 25000),  # 스라크
+    127: (5000, 25000),  # 쁘사이저
+    133: (7000, 35000),  # 이브이
+    137: (9000, 45000),  # 폴리곤
+    147: (10000, 50000),  # 미뇽
 }
 
 # 랜덤 다크 포켓몬은 구매 시점까지 어떤 종이 나올지 알 수 없으므로 도감번호별
 # 가격이 아니라 상품 자체에 가격 하나만 둡니다.
-POKEMON_SHOP_RANDOM_DARK_PRICE = 5000
+POKEMON_SHOP_RANDOM_DARK_PRICE = 300000
 
 # 랜덤 다크 포켓몬 추첨 대상 74종: 전설/환상/버그 13종 제외 + 진화체 전부 제외
 # (포켓몬정보.xlsx의 진화단계 컬럼 기준 검증 완료, 2026-09-02).
@@ -80,21 +81,21 @@ POKEMON_SHOP_RANDOM_DARK_POOL = [
 # 이름만 다를 뿐(캠프보이/피크닉걸) 같은 상품이라 딕셔너리는 boy/girl 공용
 # 하나(AVATAR_SHOP_PRICES)로 두고, 판매 대상 번호 목록만 성별별로 나눕니다.
 AVATAR_SHOP_PRICES = {
-    5: 5000,   # 색이 다른 꼬마돌 아바타
-    6: 5000,   # 벌레잡이 아바타
-    7: 5000,   # 로켓단 아바타
-    8: 5000,   # 캠프보이(남)/피크닉걸(여) 아바타
-    9: 5000,   # 세레비 후드 아바타 (boy 전용, girl은 이미지 없음)
-    10: 5000,  # 탕구리 모자 아바타
-    11: 5000,  # 화강돌 아바타
-    12: 5000,  # 고우스트 아바타 (boy 전용, girl은 이미지 없음)
-    13: 5000,  # 팬텀 아바타
-    14: 5000,  # 고오스 아바타
-    15: 5000,  # 해골몽 아바타 (boy 전용, girl은 이미지 없음)
-    16: 5000,  # 후딘 아바타
-    17: 5000,  # 딜리버드 아바타
-    18: 5000,  # 엘프 아바타
-    19: 5000,  # 이상해씨 모자 아바타
+    5: 10000,   # 색이 다른 꼬마돌 아바타
+    6: 10000,   # 벌레잡이 아바타
+    7: 10000,   # 로켓단 아바타
+    8: 10000,   # 캠프보이(남)/피크닉걸(여) 아바타
+    9: 10000,   # 세레비 후드 아바타 (boy 전용, girl은 이미지 없음)
+    10: 10000,  # 탕구리 모자 아바타
+    11: 10000,  # 화강돌 아바타
+    12: 10000,  # 고우스트 아바타 (boy 전용, girl은 이미지 없음)
+    13: 10000,  # 팬텀 아바타
+    14: 10000,  # 고오스 아바타
+    15: 10000,  # 해골몽 아바타 (boy 전용, girl은 이미지 없음)
+    16: 10000,  # 후딘 아바타
+    17: 10000,  # 딜리버드 아바타
+    18: 10000,  # 엘프 아바타
+    19: 10000,  # 이상해씨 모자 아바타
 }
 AVATAR_SHOP_NUMBERS_BOY = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 AVATAR_SHOP_NUMBERS_GIRL = [5, 6, 7, 8, 10, 11, 13, 14, 16, 17, 18, 19]
@@ -321,8 +322,8 @@ def pokemon_shop_list(
     Slot: int = Form(...),
 ):
     """
-    포켓몬 경품 코너 상품 목록을 반환합니다. 가격은 상품(도감번호)별로 다를 수
-    있으며 POKEMON_SHOP_FIXED_PRICES/POKEMON_SHOP_RANDOM_DARK_PRICE 값을 그대로
+    포켓몬 경품 코너 상품 목록을 반환합니다. 가격은 상품(도감번호)·모습(일반/샤이니)별로
+    다를 수 있으며 POKEMON_SHOP_FIXED_PRICES/POKEMON_SHOP_RANDOM_DARK_PRICE 값을 그대로
     돌려줍니다(지금은 전부 5000, 임시).
     moves는 POKEMON_INITIAL_MOVES(레벨1 기준 초기 기술, mystery_gift.py의
     register_code와 동일한 매핑)를 move_data.py로 이름 변환해 내려줍니다 —
@@ -345,7 +346,7 @@ def pokemon_shop_list(
         return {"success": False, "error": error}
 
     items = []
-    for dex, price in POKEMON_SHOP_FIXED_PRICES.items():
+    for dex, prices in POKEMON_SHOP_FIXED_PRICES.items():
         name = get_pokemon_name_by_num(dex)
         moves = [get_move_name_by_num(n) for n in POKEMON_INITIAL_MOVES.get(dex, [])]
         for form in (0, 1):
@@ -355,7 +356,7 @@ def pokemon_shop_list(
                 "dex": dex,
                 "name": name,
                 "form": form,
-                "price": price,
+                "price": prices[form],
                 "moves": moves,
             })
     items.append({
@@ -416,7 +417,7 @@ def pokemon_buy(
         if prefix != "fixed" or dex not in POKEMON_SHOP_FIXED_PRICES or form not in (0, 1):
             conn.close()
             return {"success": False, "error": "InvalidItem"}
-        price = POKEMON_SHOP_FIXED_PRICES[dex]
+        price = POKEMON_SHOP_FIXED_PRICES[dex][form]
 
     if not _try_deduct_coin(conn, account["번호"], price):
         conn.close()
