@@ -53,7 +53,6 @@ POKEMON_SHOP_FIXED_PRICES = {
     39: (1000, 5000),   # 푸린
     52: (2000, 10000),   # 나옹
     63: (3000, 15000),   # 캐이시
-    116: (4000, 20000), # 쏘드라
     123: (5000, 25000),  # 스라크
     127: (5000, 25000),  # 쁘사이저
     133: (7000, 35000),  # 이브이
@@ -346,10 +345,10 @@ def pokemon_shop_list(
         return {"success": False, "error": error}
 
     items = []
-    for dex, prices in POKEMON_SHOP_FIXED_PRICES.items():
-        name = get_pokemon_name_by_num(dex)
-        moves = [get_move_name_by_num(n) for n in POKEMON_INITIAL_MOVES.get(dex, [])]
-        for form in (0, 1):
+    for form in (0, 1):
+        for dex, prices in POKEMON_SHOP_FIXED_PRICES.items():
+            name = get_pokemon_name_by_num(dex)
+            moves = [get_move_name_by_num(n) for n in POKEMON_INITIAL_MOVES.get(dex, [])]
             items.append({
                 "id": f"fixed-{dex}-{form}",
                 "kind": "fixed",
